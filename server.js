@@ -3,7 +3,10 @@ const http = require('http'), fs = require('fs'), path = require('path');
 const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 3000;
-const ROOT = path.join(__dirname, 'public');
+// public 폴더가 있으면 거기서, 없으면(파일을 폴더 없이 올린 경우) 이 폴더에서 화면 파일을 서빙
+const PUB = path.join(__dirname, 'public');
+const ROOT = fs.existsSync(PUB) ? PUB : __dirname;
+const DENY = new Set(['server.js', 'package.json', 'package-lock.json', 'readme.txt', 'readme.md']);
 const MAX_PLAYERS = 50;
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -16,6 +19,8 @@ const server = http.createServer((req, res) => {
   if (p === '/') p = '/index.html';
   const file = path.normalize(path.join(ROOT, p));
   if (!file.startsWith(ROOT + path.sep)) { res.writeHead(403); return res.end('forbidden'); }
+  const rel = path.relative(ROOT, file).split(path.sep);
+  if (rel.some(x => x.startsWith('.') || x === 'node_modules') || DENY.has(path.basename(file).toLowerCase())) { res.writeHead(404); return res.end('not found'); }
   fs.readFile(file, (err, data) => {
     if (err) { res.writeHead(404); return res.end('not found'); }
     let type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream';
@@ -30,7 +35,7 @@ const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 2048 });
 const players = new Map();            // id -> 상태
 let nextId = 1;
 const num = (v, lo, hi, d) => Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d;
-const MODES = new Set(['idle', 'walk', 'sit', 'wave', 'steth', 'shot', 'eat', 'xr', 'read', 'lie']);
+const MODES = new Set(['idle', 'walk', 'sit', 'wave', 'steth', 'shot', 'eat', 'xr', 'read', 'lie', 'hug']);
 const OPT = { g: ['f', 'm'], h: ['none', 'bunny', 'cat', 'crown'], o: ['basic', 'spider', 'rain'] };
 const pick = (list, v, d) => list.includes(v) ? v : d;
 
@@ -62,6 +67,7 @@ wss.on('connection', ws => {
     let m; try { m = JSON.parse(raw.toString()); } catch { return; }
     if (m.t === 'u') {
       Object.assign(me, clean(m)); me.seen = true;
+      if (typeof m.n === 'string') { const nn = m.n.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 12); if (nn) me.n = nn; }
       broadcast({ t: 'u', id, n: me.n, x: me.x, z: me.z, ry: me.ry, m: me.m, sy: me.sy, c: me.c }, ws);
     } else if (m.t === 's' && typeof m.s === 'string') {
       const now = Date.now(); if (now - ws.lastSay < 300) return; ws.lastSay = now;
