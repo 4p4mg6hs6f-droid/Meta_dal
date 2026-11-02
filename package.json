@@ -1,0 +1,9 @@
+{
+  "name": "dalkids-virtual-clinic",
+  "version": "1.0.0",
+  "description": "메타 달소아청소년과 - 가상 병원 (멀티플레이 서버 + 웹앱)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "ws": "^8.18.0" }
+}
