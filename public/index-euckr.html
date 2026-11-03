@@ -35,9 +35,9 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 #exb{position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);border:0;background:#ff6b6b;color:#fff;padding:9px 14px;border-radius:18px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
 #bye{position:fixed;inset:0;z-index:200;background:#cfe8f5;color:#2b2b2b;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:30px;font-size:17px}
 #bye button{border:0;background:#ff8fb1;color:#fff;padding:10px 20px;border-radius:14px;font-size:15px;cursor:pointer}
-#dp{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 74px);display:grid;grid-template:repeat(3,40px)/repeat(3,40px);gap:1px;touch-action:none;user-select:none;-webkit-user-select:none}
-#dp button{border:0;border-radius:10px;background:var(--btn);color:var(--fg);font-size:15px;box-shadow:0 1px 4px rgba(0,0,0,.25);opacity:.92;touch-action:none;cursor:pointer}
-#dp button:active{background:var(--ac)}
+#dp{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 74px);width:126px;height:126px;border-radius:50%;background:var(--btn);box-shadow:0 1px 6px rgba(0,0,0,.28);opacity:.92;touch-action:none;user-select:none;-webkit-user-select:none}
+#dp::after{content:'';position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:2px solid rgba(128,128,128,.28);pointer-events:none}
+#dp i{position:absolute;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:16px;color:var(--fg);pointer-events:none}#dp i[data-k=u]{left:43px;top:4px}#dp i[data-k=d]{left:43px;bottom:4px}#dp i[data-k=l]{left:4px;top:43px}#dp i[data-k=r]{right:4px;top:43px}#dp i.on{background:var(--ac)}
 #pn{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 64px) 20px 20px}
 #pn>div{background:var(--card);border-radius:18px;max-width:304px;width:100%;max-height:100%;display:flex;flex-direction:column;overflow:hidden;line-height:1.6;font-size:14px}
 #pn header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(127,127,127,.25);flex:none}
@@ -58,7 +58,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 </style></head><body>
 <canvas id="c"></canvas><div id="B"></div><div id="fl" style="position:fixed;inset:0;background:#fff;opacity:0;transition:opacity .5s;pointer-events:none"></div>
 <div id="top"><b>&#x1F3E5; 메타 달소아청소년과</b><small>바닥을 터치하면 걸어가요 · 풀·나무를 터치하면 다가가서 얻어요 · 드래그: 좌우 회전 · 상하 각도</small></div>
-<div id="dp"><button data-k="ul" style="grid-area:1/1">↖</button><button data-k="u" style="grid-area:1/2">▲</button><button data-k="ur" style="grid-area:1/3">↗</button><button data-k="l" style="grid-area:2/1">◀</button><button data-k="r" style="grid-area:2/3">▶</button><button data-k="dl" style="grid-area:3/1">↙</button><button data-k="d" style="grid-area:3/2">▼</button><button data-k="dr" style="grid-area:3/3">↘</button></div>
+<div id="dp"><i data-k="u">▲</i><i data-k="l">◀</i><i data-k="r">▶</i><i data-k="d">▼</i></div>
 <div id="bar">
 <button onclick="run(recep)">&#x1F44B; 접수하기</button>
 <button onclick="run(news1)">&#x1F4CB; 소식 보기</button>
@@ -188,8 +188,8 @@ function villager(o){
   const tr=A(new THREE.TorusGeometry(.287,.009,6,30),'#f08585',0,.395,0);tr.rotation.x=P2/2;
   [-1,1].forEach(s=>{A(BX(.11,.012,.012),'#f08585',s*.1,.53,.228,null,0,s*.15);A(SP(.05,1.5,.85,.4),'#f3e6c4',s*.1,.5,.222)});
   // 리본
-  [-1,1].forEach(s=>{A(SP(.115,1.2,.85,.55),'#e5303b',s*.1,.835,.208,null,0,s*.3);A(BX(.06,.15,.02),'#c01f27',s*.05,.73,.212,null,0,s*.18)});
-  A(SP(.05,1,1,.85),'#b81c24',0,.835,.225);
+  [-1,1].forEach(s=>{A(SP(.115,1.25,.58,.5),'#e5303b',s*.105,.765,.208,null,0,-s*.18);A(BX(.06,.13,.02),'#c01f27',s*.05,.665,.212,null,0,s*.16)});
+  A(SP(.05,1,1,.85),'#b81c24',0,.765,.225);
  }else{
   A(CY(.19,.235,.42,20),'#f6ecd0',0,.64,0);
   A(BX(.075,.075,.012),'#e0d5b6',.085,.73,.214);
@@ -467,9 +467,15 @@ function dpadMove(dt){const dx=held.r-held.l,dy=held.u-held.d;
  const q=[[c[0]+vx*st,c[1]+vz*st],[c[0]+vx*st,c[1]],[c[0],c[1]+vz*st]].find(q=>mvOk(q[0],q[1],c));
  if(q){const w=P(q[0],q[1]);p.x=w.x;p.z=w.z}
  let da=Math.atan2(vx,vz)-me.g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));me.g.rotation.y+=da*Math.min(1,dt*14);return true}
-document.querySelectorAll('#dp button').forEach(b=>{const k=b.dataset.k;
- b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);if(!wasH)stopAll();for(const c of k)held[c]=1});
- ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>{for(const c of k)held[c]=0}))});
+const dpEl=document.getElementById('dp'),dpBtn={},dpPtr=new Map();dpEl.querySelectorAll('i').forEach(b=>dpBtn[b.dataset.k]=b);
+function dpKey(e){const r=dpEl.getBoundingClientRect(),R=r.width/2,dx=e.clientX-(r.left+R),dy=e.clientY-(r.top+R),d=Math.hypot(dx,dy);
+ if(d>R+28||d<R*.22)return '';const ax=Math.abs(dx),ay=Math.abs(dy),v=dy<0?'u':'d',h=dx<0?'l':'r';
+ if(Math.min(ax,ay)/Math.max(ax,ay)>.414)return v+h; // 사이를 누르면 대각선 (보이는 건 상하좌우뿐)
+ return ax>ay?h:v}
+function dpApply(){held.u=held.d=held.l=held.r=0;const on=new Set();dpPtr.forEach(k=>{for(const c of k){held[c]=1;on.add(c)}});for(const k in dpBtn)dpBtn[k].classList.toggle('on',on.has(k))}
+dpEl.addEventListener('pointerdown',e=>{e.preventDefault();try{dpEl.setPointerCapture(e.pointerId)}catch{}if(!wasH)stopAll();dpPtr.set(e.pointerId,dpKey(e));dpApply()});
+dpEl.addEventListener('pointermove',e=>{if(!dpPtr.has(e.pointerId))return;e.preventDefault();const k=dpKey(e);if(dpPtr.get(e.pointerId)!==k){dpPtr.set(e.pointerId,k);dpApply()}});
+['pointerup','pointercancel','lostpointercapture'].forEach(ev=>dpEl.addEventListener(ev,e=>{if(dpPtr.delete(e.pointerId))dpApply()}));
 const KM={ArrowUp:'u',w:'u',ArrowDown:'d',s:'d',ArrowLeft:'l',a:'l',ArrowRight:'r',d:'r'};
 addEventListener('keydown',e=>{const k=KM[e.key];if(k){if(!wasH)stopAll();held[k]=1;e.preventDefault()}});
 addEventListener('keyup',e=>{const k=KM[e.key];if(k)held[k]=0});
