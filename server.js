@@ -67,7 +67,7 @@ wss.on('connection', ws => {
     let m; try { m = JSON.parse(raw.toString()); } catch { return; }
     if (m.t === 'u') {
       Object.assign(me, clean(m)); me.seen = true;
-      if (typeof m.n === 'string') { const nn = m.n.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 12); if (nn) me.n = nn; }
+      if (typeof m.n === 'string') { const nn = m.n.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 24); if (nn) me.n = nn; }
       broadcast({ t: 'u', id, n: me.n, x: me.x, z: me.z, ry: me.ry, m: me.m, sy: me.sy, c: me.c }, ws);
     } else if (m.t === 's' && typeof m.s === 'string') {
       const now = Date.now(); if (now - ws.lastSay < 300) return; ws.lastSay = now;
