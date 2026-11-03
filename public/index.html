@@ -151,12 +151,10 @@ function villager(o){
  // ---- 머리 / 얼굴
  A(SP(hr,1.04,.96,1),skin,0,hy,0);
  [-1,1].forEach(s=>A(SP(.075,.55,1,.9),skin,s*hr*1.03,hy-.03,0));
- const ex=.15,ey=hy-.04,ez=.322;
- [-1,1].forEach(s=>{
-  if(girl){A(SP(.092,.9,1.12,.4),'#243e8c',s*ex,ey,ez);A(SP(.07,.8,1,.4),'#4f86e6',s*ex,ey-.006,ez+.016);A(SP(.042,.8,1,.4),'#0f1838',s*ex,ey-.006,ez+.03);
-   A(SP(.024),'#ffffff',s*ex+.03,ey+.04,ez+.046);A(SP(.013),'#ffffff',s*ex-.025,ey-.035,ez+.046);A(BX(.055,.012,.012),'#3a2418',s*(ex+.07),ey+.062,ez+.02,null,0,-s*.7)}
-  else{A(SP(.092,.95,1.1,.4),'#6b3a22',s*ex,ey,ez);A(SP(.052,.9,1,.4),'#1c100a',s*ex,ey-.004,ez+.024);A(SP(.025),'#ffffff',s*ex+.03,ey+.04,ez+.045);A(SP(.012),'#ffffff',s*ex-.02,ey-.03,ez+.045)}
-  A(SP(.078,1,.65,.3),girl?'#ff9f9a':'#f08672',s*.235,hy-.115,.255)});
+ const ex=.14,ey=hy-.02,ez=.325,er=.062;
+ [-1,1].forEach(s=>{A(SP(er,1,1.18,.45),'#2b1d18',s*ex,ey,ez);A(SP(er*.28),'#ffffff',s*ex+er*.3,ey+er*.4,ez+er*.28);
+  A(BX(.1,.02,.02),'#2a2420',s*ex,ey+.095,ez-.005);
+  A(SP(.075,1,.7,.3),'#ff9fa8',s*.215,hy-.1,.27)});
  A(SP(.03,1,.9,.8),girl?'#f7a58f':'#e8805f',0,hy-.105,.352);
  const mo=A(new THREE.TorusGeometry(.07,.011,6,18,P2),'#7a3a30',0,hy-.115,.335);mo.rotation.z=P2;
  // ---- 머리카락
@@ -166,9 +164,8 @@ function villager(o){
   const c2=new THREE.Mesh(cap(.412,P2/2+.78,2*P2-1.56,0,2.15,1.03,1,1.03),hm);c2.position.set(cx,cy,cz);g.add(c2);
   const bg=new THREE.Mesh(new THREE.CylinderGeometry(.385,.39,.125,30,1,true,-.98,1.96),hm);bg.position.set(0,hy+.145,-.01);g.add(bg);
  }else{
-  const c1=new THREE.Mesh(cap(.4,0,2*P2,0,1.78,1.03,1,1.03),hm);c1.position.set(cx,cy,cz);g.add(c1);
-  const bg=new THREE.Mesh(new THREE.CylinderGeometry(.385,.39,.11,30,1,true,-1.05,2.1),hm);bg.position.set(0,hy+.155,-.01);g.add(bg);
-  [[-.13,.22,.27,.45],[.01,.235,.29,.15],[.13,.215,.26,-.3]].forEach(t=>{const k=new THREE.Mesh(SP(.11,1,.42,.55),hm);k.position.set(t[0],hy+t[1],t[2]);k.rotation.z=t[3];g.add(k)});
+  const c1=new THREE.Mesh(cap(.4,0,2*P2,0,1.15,1.03,1,1.03),hm);c1.position.set(cx,cy,cz);g.add(c1);
+  const c2=new THREE.Mesh(cap(.405,P2/2+.85,2*P2-1.7,0,1.85,1.03,1,1.03),hm);c2.position.set(cx,cy,cz);g.add(c2);
  }
  // ---- 모자
  if(o.hat==='bunny'){const w='#fdfdfd';A(new THREE.TorusGeometry(.405,.03,6,24,P2),w,0,hy+.03,-.02);
