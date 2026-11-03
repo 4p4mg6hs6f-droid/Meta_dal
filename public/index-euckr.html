@@ -57,7 +57,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 
 </style></head><body>
 <canvas id="c"></canvas><div id="B"></div><div id="fl" style="position:fixed;inset:0;background:#fff;opacity:0;transition:opacity .5s;pointer-events:none"></div>
-<div id="top"><b>&#x1F3E5; 메타 달소아청소년과</b><small>바닥을 터치하면 걸어가요 · 드래그: 좌우 회전 · 상하 각도</small></div>
+<div id="top"><b>&#x1F3E5; 메타 달소아청소년과</b><small>바닥을 터치하면 걸어가요 · 풀·나무를 터치하면 다가가서 얻어요 · 드래그: 좌우 회전 · 상하 각도</small></div>
 <div id="dp"><button data-k="u" style="grid-area:1/2">▲</button><button data-k="l" style="grid-area:2/1">◀</button><button data-k="r" style="grid-area:2/3">▶</button><button data-k="d" style="grid-area:3/2">▼</button></div>
 <div id="bar">
 <button onclick="run(recep)">&#x1F44B; 접수하기</button>
@@ -96,8 +96,8 @@ function box(x1,y1,x2,y2,h,c,y0=0){const m=new THREE.Mesh(new THREE.BoxGeometry(
 // 바닥
 {const gc=document.createElement('canvas');gc.width=gc.height=256;const gx=gc.getContext('2d');gx.fillStyle='#86c46a';gx.fillRect(0,0,256,256);
  for(let i=0;i<900;i++){gx.fillStyle=['#78b85c','#95d078','#6fae55'][i%3];gx.fillRect(Math.random()*256,Math.random()*256,2,5)}
- const gt=new THREE.CanvasTexture(gc);gt.wrapS=gt.wrapT=THREE.RepeatWrapping;gt.repeat.set(44,44);
- const gr=box(-300,-300,800,700,.1,'#ffffff',-.3);gr.material=new THREE.MeshLambertMaterial({map:gt})}
+ const gt=new THREE.CanvasTexture(gc);gt.wrapS=gt.wrapT=THREE.RepeatWrapping;gt.repeat.set(56,52);
+ const gr=box(-420,-420,920,820,.1,'#ffffff',-.3);gr.material=new THREE.MeshLambertMaterial({map:gt})}
 fbox(0,0,341,413,.1,'#9b9b9f',-.1);
 fbox(0,0,188,184,.02,'#f6d58a');fbox(0,188,188,313,.02,'#9ccbff');fbox(341,0,512,163,.1,'#f0b0cf',-.1);
 // 벽
@@ -269,24 +269,38 @@ function setCz(k,v){cz[k]=v;rebuildMe();try{localStorage.setItem('czv1',JSON.str
 // 말풍선
 const bs=[];
 function say(p,txt,ms=2600,cls=''){if(p===me&&ms>0&&window.MPsay)window.MPsay(txt,ms);const e=document.createElement('div');e.className='b '+cls;e.textContent=txt;B.appendChild(e);const o={e,p};bs.push(o);if(ms)setTimeout(()=>{e.remove();bs.splice(bs.indexOf(o),1)},ms)}
-let myName='용감한 친구';try{const v=localStorage.getItem('czname');if(v)myName=v.slice(0,12)}catch(e){}
+let myName='용감한 친구';try{const v=localStorage.getItem('czname');if(v)myName=v.slice(0,24)}catch(e){}
 function setName(o,name){const nm=o.e.querySelector('.nm'),mq=o.e.querySelector('.mq');mq.classList.remove('run');mq.textContent=name;
  requestAnimationFrame(()=>{if(mq.scrollWidth>nm.clientWidth+1){const gap='\u2003\u2003';mq.textContent=name+gap+name+gap;mq.style.setProperty('--d',Math.max(5,name.length*.7)+'s');mq.classList.add('run')}})}
 function mkTag(p,name,mine){const e=document.createElement('div');e.className='b tag'+(mine?' mine':'');e.innerHTML='<span class="av">'+(mine?'나':'친')+'</span><span class="nm"><span class="mq"></span></span>';B.appendChild(e);
  const o={e,p};bs.push(o);setName(o,name);if(mine)e.querySelector('.nm').addEventListener('pointerdown',ev=>{ev.stopPropagation();openName()});return o}
 const myTag=mkTag(me,myName,true);
-function openName(){panel('\u{270F}\u{FE0F} 이름 바꾸기',['<input id="nmi" maxlength="12" value="'+myName.replace(/"/g,'&quot;')+'" placeholder="이름 (최대 12글자)">','<button class="chip on" onclick="saveName()">저장</button>']);setTimeout(()=>{const i=document.getElementById('nmi');if(i){i.focus();i.select()}},60)}
-function saveName(){const v=document.getElementById('nmi').value.trim().slice(0,12);if(v){myName=v;setName(myTag,v);try{localStorage.setItem('czname',v)}catch(e){}}pn.style.display='none'}
+function openName(){panel('\u{270F}\u{FE0F} 이름 바꾸기',['<input id="nmi" maxlength="24" value="'+myName.replace(/"/g,'&quot;')+'" placeholder="이름 (최대 24글자)">','<button class="chip on" onclick="saveName()">저장</button>']);setTimeout(()=>{const i=document.getElementById('nmi');if(i){i.focus();i.select()}},60)}
+function saveName(){const v=document.getElementById('nmi').value.trim().slice(0,24);if(v){myName=v;setName(myTag,v);try{localStorage.setItem('czname',v)}catch(e){}}pn.style.display='none'}
 function quitApp(){try{window.close()}catch(e){}setTimeout(()=>{document.getElementById('bye').style.display='flex'},200)}
 // 이동
 let path=[],pr=null,token=0,camA=0,camP=.6,zoom=1;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function walk(pts){if(pr){pr(false)}path=pts.slice();if(!path.length)return Promise.resolve(true);me.mode='walk';return new Promise(r=>pr=r)}
-const OB=[[-5,176,196,200],[7,264,156,324],[37,62,150,112],[420,82,516,142],[140,200,192,280],[216,98,312,142],[216,162,312,206],[216,226,312,270],[331,163,345,205],[331,280,345,413],[337,158,520,173],[432,311,508,342],[0,-176,44,-96],[0,-91,44,-11],[76,-152,108,-120],[76,-67,108,-35],[184,-8,346,8],[184,-100,346,-88],[184,-190,198,-158],[184,-108,198,-68],[184,-14,198,8],[238,-172,332,-128],[238,-78,332,-34],[312,-125,332,-107],[312,-33,332,-15],[188,3,338,42],[-78,502,-42,538],[412,572,448,608],[552,482,588,518],[-128,428,184,444],[346,428,628,444],[-128,428,-112,648],[612,428,628,648],[-128,632,628,648]];
+const OB=[[-5,176,196,200],[7,264,156,324],[37,62,150,112],[420,82,516,142],[140,200,192,280],[216,98,312,142],[216,162,312,206],[216,226,312,270],[331,163,345,205],[331,280,345,413],[337,158,520,173],[432,311,508,342],[0,-176,44,-96],[0,-91,44,-11],[76,-152,108,-120],[76,-67,108,-35],[184,-8,346,8],[184,-100,346,-88],[184,-190,198,-158],[184,-108,198,-68],[184,-14,198,8],[238,-172,332,-128],[238,-78,332,-34],[312,-125,332,-107],[312,-33,332,-15],[188,3,338,42],[-78,502,-42,538],[412,572,448,608],[552,482,588,518]];
 const inR=(p,r)=>p[0]>r[0]&&p[0]<r[2]&&p[1]>r[1]&&p[1]<r[3];
-function blk(a,b){for(const r of OB){if(inR(a,r)||inR(b,r))continue;for(let i=0;i<=24;i++){const t=i/24;if(inR([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],r))return true}}return false}
+// 울타리 영역(병원 둘레 전체 풀밭)과 건물 바깥벽
+const AR=[-280,-280,780,680];
+const SH=[[-8,-196,6,414],[-8,-196,347,-184],[333,-196,347,4],[341,-8,520,4],[510,-8,520,350],[341,338,520,350]];
+OB.push([AR[0]-8,AR[1]-8,AR[2]+8,AR[1]+8],[AR[0]-8,AR[3]-8,AR[2]+8,AR[3]+8],[AR[0]-8,AR[1]-8,AR[0]+8,AR[3]+8],[AR[2]-8,AR[1]-8,AR[2]+8,AR[3]+8]);
+const inBld=(x,y)=>(x>-8&&x<347&&y>-194&&y<414)||(x>336&&x<520&&y>-8&&y<350);
+const inBldP=(x,y,p)=>(x>-8-p&&x<347+p&&y>-194-p&&y<414+p)||(x>336-p&&x<520+p&&y>-8-p&&y<350+p);
+const OUT=(x,y)=>x>AR[0]+14&&x<AR[2]-14&&y>AR[1]+14&&y<AR[3]-14&&!inBld(x,y);
+const OBR=OB.concat(SH);
+function blk(a,b){const len=Math.hypot(b[0]-a[0],b[1]-a[1]),n=Math.max(24,Math.ceil(len/8));
+ for(const r of OBR){if(inR(a,r)||inR(b,r))continue;
+  if(Math.max(a[0],b[0])<r[0]||Math.min(a[0],b[0])>r[2]||Math.max(a[1],b[1])<r[1]||Math.min(a[1],b[1])>r[3])continue;
+  for(let i=0;i<=n;i++){const t=i/n;if(inR([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],r))return true}}return false}
 const HB=[];[203,325].forEach(x=>[52,105,170,250,290,335,385].forEach(y=>HB.push([x,y])));HB.push([341,105]);[[170,20],[170,52],[170,-20],[170,-93],[170,-135],[170,-41],[170,-165],[110,-93],[191,-135],[225,-118],[191,-41],[225,-26]].forEach(h=>HB.push(h));
-[-100,0,100,200,300,400,500,600].forEach(x=>[470,540,600].forEach(y=>HB.push([x,y])));HB.push([264,425],[264,452],[203,430],[325,430]);
+HB.push([264,425],[264,452],[203,430],[325,430]);
+// 건물 바깥 모서리와 풀밭 격자 경유점
+[[-30,-216],[369,-216],[369,-30],[542,-30],[542,372],[369,372],[-30,436],[369,436],[-30,100],[-30,300]].forEach(h=>HB.push(h));
+function addGridNodes(){for(let x=-250;x<=750;x+=100)for(let y=-250;y<=650;y+=100){if(inBldP(x,y,28))continue;if(OB.some(r=>x>r[0]-14&&x<r[2]+14&&y>r[1]-14&&y<r[3]+14))continue;HB.push([x,y])}}
 function route(a,b){const N=[a,b,...HB],d=N.map(()=>1e9),pv=N.map(()=>-1),dn=N.map(()=>false);d[0]=0;
  for(let k=0;k<N.length;k++){let u=-1;for(let i=0;i<N.length;i++)if(!dn[i]&&(u<0||d[i]<d[u]))u=i;if(u<0||d[u]>=1e9)break;dn[u]=true;if(u==1)break;
   for(let v=0;v<N.length;v++)if(!dn[v]&&!blk(N[u],N[v])){const w=d[u]+Math.hypot(N[u][0]-N[v][0],N[u][1]-N[v][1]);if(w<d[v]){d[v]=w;pv[v]=u}}}
@@ -344,7 +358,7 @@ mk([bR],()=>run(news1));mk([bI],()=>run(news2));mk([man.g,cR],()=>run(recep));mk
 chairs.forEach((c,i)=>mk([c],()=>run(t=>sit(i,t))));
 const rects=[[140,200,192,280],[10,270,150,316],[40,68,146,104],[428,88,510,134],[432,311,508,342],[0,-176,44,-96],[0,-91,44,-11],[76,-152,108,-120],[76,-67,108,-35],[184,-8,346,8],[184,-100,346,-88],[184,-190,198,-158],[184,-108,198,-68],[184,-14,198,8],[238,-172,332,-128],[238,-78,332,-34],[188,3,338,42],[0,0,8,413],[-78,502,-42,538],[412,572,448,608],[552,482,588,518],[188,176,200,200]];
 function ok(x,y){if(rects.some(r=>x>r[0]&&x<r[2]&&y>r[1]&&y<r[3]))return false;
- if(x>8&&x<333&&y>-180&&y<416)return !(x<196&&y>176&&y<200);return (x>341&&x<504&&y>8&&y<155)||(x>345&&x<504&&y>178&&y<332)||(x>-250&&x<750&&y>=416&&y<660)}
+ if(x>8&&x<333&&y>-180&&y<416)return !(x<196&&y>176&&y<200);return (x>341&&x<504&&y>8&&y<155)||(x>345&&x<504&&y>178&&y<332)||OUT(x,y)}
 let dn=null,drag=false;
 cv.addEventListener('pointerdown',e=>{dn=[e.clientX,e.clientY];drag=false});
 cv.addEventListener('pointermove',e=>{if(!dn||!e.buttons&&e.pointerType==='mouse')return;const dx=e.clientX-dn[0],dy=e.clientY-dn[1];if(Math.abs(dx)>6||Math.abs(dy)>6||drag){drag=true;camA-=dx*.006;camP=Math.min(1.25,Math.max(.25,camP+dy*.004));dn=[e.clientX,e.clientY]}});
@@ -355,7 +369,7 @@ cv.addEventListener('pointerup',e=>{if(!dn||drag){dn=null;return}dn=null;
  const v=new THREE.Vector3();if(!ray.ray.intersectPlane(pl,v))return;const q=PX(v);
  if(ok(q[0],q[1]))run(async t=>{await go(q[0],q[1])})});
 const held={u:0,d:0,l:0,r:0};let wasH=false;
-function mvOk(x,y,c){const base=(x>8&&x<333&&y>-180&&y<416)||(x>-250&&x<750&&y>=416&&y<660)||(x>=333&&x<=345&&((y>8&&y<155)||(y>208&&y<278)))||(x>345&&x<504&&((y>8&&y<155)||(y>178&&y<332)));
+function mvOk(x,y,c){const base=(x>8&&x<333&&y>-180&&y<416)||OUT(x,y)||(x>=333&&x<=345&&((y>8&&y<155)||(y>208&&y<278)))||(x>345&&x<504&&((y>8&&y<155)||(y>178&&y<332)));
  if(!base)return false;for(const r of OB){if(inR(c,r))continue;if(inR([x,y],r))return false}return true}
 function stopAll(){token++;releaseHug();if(pr){pr(false);pr=null}path=[];if(me.mode!=='walk')me.mode='idle';man.mode=doc.mode='idle';doc.g.rotation.y=0}
 function dpadMove(dt){const dx=held.r-held.l,dy=held.u-held.d;
@@ -375,19 +389,39 @@ addEventListener('keydown',e=>{const k=KM[e.key];if(k){if(!wasH)stopAll();held[k
 addEventListener('keyup',e=>{const k=KM[e.key];if(k)held[k]=0});
 // ===== 풀밭: 동물, 풀, 도토리 =====
 const GX=px=>px*K-6.4,GZ=py=>py*K-4.5;
-const ARENA={x1:GX(-120),x2:GX(620),z1:GZ(436),z2:GZ(640)};
-const treePos=[[-60,520],[430,590],[570,500]].map(([x,y])=>{const g=new THREE.Group(),p=P(x,y);
+const ARENA={x1:GX(AR[0]),x2:GX(AR[2]),z1:GZ(AR[1]),z2:GZ(AR[3])};
+const TREE_PX=[[-60,520],[430,590],[570,500],[-130,60],[-160,260],[-110,380],[90,-235],[250,-235],[430,-215],[600,-120],[640,40],[690,230],[620,420],[-200,600],[100,630],[330,640],[700,600]];
+const TUFT_PX=[[110,470],[340,540],[520,610],[-80,200],[-190,130],[-60,-70],[160,-228],[380,-110],[570,-225],[590,130],[680,340],[560,-60],[-150,480],[200,600],[650,560],[460,500]];
+TREE_PX.slice(3).forEach(([x,y])=>{const r=[x-18,y-18,x+18,y+18];OB.push(r);OBR.push(r);rects.push(r)});
+const hitMesh=(rad,h)=>new THREE.Mesh(new THREE.CylinderGeometry(rad,rad,h,8),new THREE.MeshBasicMaterial({visible:false}));
+const treePos=TREE_PX.map(([x,y])=>{const g=new THREE.Group(),p=P(x,y);
  const tr=new THREE.Mesh(new THREE.CylinderGeometry(.14,.2,1.2,8),M('#7a5230'));tr.position.y=.6;g.add(tr);
  [[0,1.6,0,.7],[.4,1.4,.1,.5],[-.35,1.45,-.1,.5]].forEach(a=>{const c=new THREE.Mesh(new THREE.SphereGeometry(a[3],12,10),M('#3f8f4a'));c.position.set(a[0],a[1],a[2]);g.add(c)});
  [[.4,1.15,.5],[-.45,1.25,.3],[.1,1.05,-.55]].forEach(a=>{const ac=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),M('#a0632a'));ac.position.set(a[0],a[1],a[2]);g.add(ac)});
- g.position.set(p.x,0,p.z);S.add(g);return{x:p.x,z:p.z}});
-const tuftPos=[[110,470],[340,540],[520,610]].map(([x,y])=>{const g=new THREE.Group(),p=P(x,y);
+ const ht=hitMesh(1.0,2.4);ht.position.y=1.2;g.add(ht);
+ g.position.set(p.x,0,p.z);S.add(g);return{x:p.x,z:p.z,px:x,py:y,g,kind:'tree'}});
+const tuftPos=TUFT_PX.map(([x,y])=>{const g=new THREE.Group(),p=P(x,y);
  for(let i=0;i<9;i++){const a=i/9*Math.PI*2,r=.06+(i%3)*.04,b=new THREE.Mesh(new THREE.ConeGeometry(.045,.42+(i%3)*.1,5),M(['#4fae4a','#62c05a','#3b9a42'][i%3]));
   b.position.set(Math.cos(a)*r,.21,Math.sin(a)*r);b.rotation.z=-Math.cos(a)*.3;b.rotation.x=Math.sin(a)*.3;g.add(b)}
- g.position.set(p.x,0,p.z);S.add(g);return{x:p.x,z:p.z}});
+ const ht=hitMesh(.5,.9);ht.position.y=.4;g.add(ht);
+ g.position.set(p.x,0,p.z);S.add(g);return{x:p.x,z:p.z,px:x,py:y,g,kind:'grass'}});
+// 터치하면 가까이 가서 얻기
+function standSpot(o,dist){const c=PX(me.g.position),base=Math.atan2(c[1]-o.py,c[0]-o.px);
+ for(const off of [0,.5,-.5,1,-1,1.6,-1.6,2.2,-2.2,3.14]){for(const dd of [dist,dist+16]){const a=base+off,x=o.px+Math.cos(a)*dd,y=o.py+Math.sin(a)*dd;if(ok(x,y))return[x,y]}}
+ return[o.px+dist,o.py]}
+async function pickItem(o,t){
+ if(holding){say(me,holding==='grass'?'이미 풀을 들고 있어요! 토끼에게 먼저 줘 볼까요? \u{1F430}':'이미 도토리를 들고 있어요! 다람쥐에게 먼저 줘 볼까요? \u{1F43F}\u{FE0F}',2600);return}
+ const sp=standSpot(o,o.kind==='tree'?40:26);
+ if(!await go(sp[0],sp[1]))return;if(t!==token)return;
+ face(Math.atan2(o.x-me.g.position.x,o.z-me.g.position.z));me.mode='steth';
+ say(me,o.kind==='tree'?'도토리를 주워 볼까~ \u{1F330}':'풀을 뽑아 볼까~ \u{1F33F}',1100);await sleep(1000);if(t!==token)return;
+ me.mode='idle';holding=o.kind==='tree'?'acorn':'grass';attachHeld();pickT=1.5;
+ say(me,holding==='grass'?'풀을 뽑았어요 \u{1F33F} 토끼에게 가 볼까?':'도토리를 주웠어요 \u{1F330} 다람쥐에게 가 볼까?',2500)}
+treePos.concat(tuftPos).forEach(o=>mk([o.g],()=>run(t=>pickItem(o,t))));
 {const fm=M('#a77b4f');const rail=(x1,z1,x2,z2)=>{const L=Math.hypot(x2-x1,z2-z1);[.28,.5].forEach(h=>{const m=new THREE.Mesh(new THREE.BoxGeometry(L,.05,.05),fm);m.position.set((x1+x2)/2,h,(z1+z2)/2);m.rotation.y=-Math.atan2(z2-z1,x2-x1);S.add(m)});
   const n=Math.max(2,Math.round(L/1.2));for(let i=0;i<=n;i++){const q=new THREE.Mesh(new THREE.BoxGeometry(.07,.6,.07),fm);q.position.set(x1+(x2-x1)*i/n,.3,z1+(z2-z1)*i/n);S.add(q)}};
- const {x1,x2,z1,z2}=ARENA;const g1=GX(184),g2=GX(346);rail(x1,z1,g1,z1);rail(g2,z1,x2,z1);rail(x1,z1,x1,z2);rail(x2,z1,x2,z2);rail(x1,z2,x2,z2)}
+ const {x1,x2,z1,z2}=ARENA;rail(x1,z1,x2,z1);rail(x1,z1,x1,z2);rail(x2,z1,x2,z2);rail(x1,z2,x2,z2)}
+addGridNodes();
 function mkAnimal(type){const g=new THREE.Group();
  const E=(r,sx,sy,sz,c,x,y,z)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,14,10),M(c));m.scale.set(sx,sy,sz);m.position.set(x,y,z);g.add(m);return m};
  let h=1;
@@ -412,19 +446,17 @@ hacorn.position.set(0,-.42,.05);
 function attachHeld(){me.armR.add(hgrass);me.armR.add(hacorn);hgrass.visible=holding==='grass';hacorn.visible=holding==='acorn'}
 attachHeld();
 function releaseHug(){if(hugT>0){hugT=0;doRelease()}}
-function doRelease(){AN.forEach(a=>{if(a.hug){a.hug=false;a.calm=2.5;a.corner=0;const f=me.g.rotation.y,nx=me.g.position.x+Math.sin(f)*.7,nz=me.g.position.z+Math.cos(f)*.7;
-  a.x=Math.min(ARENA.x2-.3,Math.max(ARENA.x1+.3,nx));a.z=Math.min(ARENA.z2-.3,Math.max(ARENA.z1+.3,nz));a.g.position.set(a.x,0,a.z)}});if(me.mode==='hug')me.mode='idle'}
-const inBld=(x,y)=>(x>-8&&x<347&&y>-194&&y<414)||(x>336&&x<520&&y>-8&&y<350);
-const free=(x,z)=>x>ARENA.x1+.25&&x<ARENA.x2-.25&&z>ARENA.z1+.25&&z<ARENA.z2-.25&&treePos.every(t=>Math.hypot(x-t.x,z-t.z)>.4);
+function doRelease(){AN.forEach(a=>{if(a.hug){a.hug=false;a.calm=1.5;a.corner=0;const f=me.g.rotation.y;let nx=me.g.position.x,nz=me.g.position.z;
+  outer:for(const dd of [.8,1.1,1.5])for(const off of [0,1.57,-1.57,3.14,.8,-.8]){const x=me.g.position.x+Math.sin(f+off)*dd,z=me.g.position.z+Math.cos(f+off)*dd;if(free(x,z)){nx=x;nz=z;break outer}}
+  a.x=nx;a.z=nz;a.g.position.set(a.x,0,a.z)}});if(me.mode==='hug')me.mode='idle'}
+const free=(x,z)=>{if(!(x>ARENA.x1+.25&&x<ARENA.x2-.25&&z>ARENA.z1+.25&&z<ARENA.z2-.25))return false;if(treePos.some(t=>Math.hypot(x-t.x,z-t.z)<=.4))return false;const q=PX({x,z});return !inBldP(q[0],q[1],14)};
+const FLEE=3.2;
 const ANIM={tick(dt){
  const mx=me.g.position.x,mz=me.g.position.z,px=PX(me.g.position);
  // 병원 안으로 들고 들어가면 떨어뜨리기
  if(holding&&inBld(px[0],px[1])){const dm=(holding==='grass'?hgrass:hacorn).clone();dm.visible=true;dm.position.set(mx,.1,mz+.2);dm.rotation.set(0,0,Math.PI/2);S.add(dm);setTimeout(()=>S.remove(dm),6000);
   say(me,holding==='grass'?'병원엔 풀을 못 가져가요! 떨어뜨렸어요 \u{1F33F}':'병원엔 도토리를 못 가져가요! 떨어뜨렸어요 \u{1F330}',2600);holding=null;attachHeld();pickT=1.5}
  pickT=Math.max(0,pickT-dt);
- if(!holding&&pickT<=0&&!inBld(px[0],px[1])){
-  if(tuftPos.some(t=>Math.hypot(mx-t.x,mz-t.z)<.9)){holding='grass';attachHeld();say(me,'풀을 뽑았어요 \u{1F33F} 토끼에게 가 볼까?',2500)}
-  else if(treePos.some(t=>Math.hypot(mx-t.x,mz-t.z)<1.15)){holding='acorn';attachHeld();say(me,'도토리를 주웠어요 \u{1F330} 다람쥐에게 가 볼까?',2500)}}
  // 안기
  if(hugT>0){hugT-=dt;if(me.mode==='idle')me.mode='hug';if(hugT<=0)doRelease()}
  for(const a of AN){
@@ -434,23 +466,24 @@ const ANIM={tick(dt){
   let vx=0,vz=0,sp=0;
   if(a.eat>0){a.eat-=dt;a.g.position.y=Math.abs(Math.sin(T*14))*.03;a.corner=0}
   else if(want&&d<5.5){if(d>.78){vx=dx/d;vz=dz/d;sp=2.4}else{holding=null;attachHeld();a.eat=2.2;pickT=1.5;say(a,'냠냠 \u{1F60B}',2000);say(me,a.type==='rabbit'?'토끼야, 풀 먹어~ \u{1F33F}':'다람쥐야, 도토리 먹어~ \u{1F330}',2200)}}
-  else if(a.hopT>0){vx=a.hdx;vz=a.hdz;sp=a.fast||3.4;a.hopT-=dt;if(a.hopT<=0){a.hopsLeft--;if(a.hopsLeft<=0){a.hopsLeft=0;a.pause=.55}}}
-  else if(a.pause>0){a.pause-=dt}
-  else if(d<1.7&&a.calm<=0&&!hugT){ // 도망: 아바타 방향 기준 135° / 225° 번갈아
-   if(a.hopsLeft<=0)a.hopsLeft=1+Math.floor(Math.random()*2);
-   const ang=(a.alt%2===0?135:225)*Math.PI/180;a.alt++;const bx=dx/d,bz=dz/d,c=Math.cos(ang),s=Math.sin(ang);
-   a.hdx=bx*c-bz*s;a.hdz=bx*s+bz*c;a.hopT=.42;a.fast=3.4}
-  else{a.wait-=dt;if(a.wait<=0){a.wait=2+Math.random()*3;const r=Math.random()*Math.PI*2;a.hdx=Math.cos(r);a.hdz=Math.sin(r);a.hopT=.3;a.fast=1.5;a.hopsLeft=1}}
-  // 이동 + 벽(울타리/나무) 충돌
+  else if(d<FLEE&&a.calm<=0&&!hugT){ // 도망: 조금만 가까워져도 바로, 쉬지 않고 135° / 225° 번갈아 (막히면 다른 각도)
+   if(a.hopT<=0){const bx=dx/d,bz=dz/d,cand=a.alt%2===0?[135,225,180,90,270,55,305]:[225,135,180,270,90,305,55];a.alt++;let ok2=false;
+    for(const dg of cand){const ang=dg*Math.PI/180,c=Math.cos(ang),sn=Math.sin(ang),hx=bx*c-bz*sn,hz=bx*sn+bz*c;
+     if(free(a.x+hx*.5,a.z+hz*.5)&&free(a.x+hx*1.2,a.z+hz*1.2)){a.hdx=hx;a.hdz=hz;ok2=true;break}}
+    if(!ok2){a.hdx=0;a.hdz=0}a.hopT=.4;a.fast=4.1}
+   a.hopT-=dt;vx=a.hdx;vz=a.hdz;sp=a.fast;a.wait=.4}
+  else if(a.hopT>0){vx=a.hdx;vz=a.hdz;sp=a.fast||1.5;a.hopT-=dt}
+  else{a.wait-=dt;if(a.wait<=0){a.wait=2+Math.random()*3;const r=Math.random()*Math.PI*2;a.hdx=Math.cos(r);a.hdz=Math.sin(r);a.hopT=.3;a.fast=1.5}}
+  // 이동 + 벽(울타리/나무/건물) 충돌
   let moved=false;
-  if(sp>0){const nx=a.x+vx*sp*dt,nz=a.z+vz*sp*dt;
+  if(sp>0&&(vx||vz)){const nx=a.x+vx*sp*dt,nz=a.z+vz*sp*dt;
    if(free(nx,nz)){a.x=nx;a.z=nz;a.stuck=false;moved=true}
    else if(free(nx,a.z)&&Math.abs(vx)>.2){a.x=nx;a.stuck=false;moved=true}
    else if(free(a.x,nz)&&Math.abs(vz)>.2){a.z=nz;a.stuck=false;moved=true}
-   else a.stuck=true}
-  // 막혀서 아바타와 붙어 있으면 1초 뒤 안기
-  if(a.stuck&&d<.7&&!hugT&&a.eat<=0){a.corner+=dt;if(a.corner>=1){a.corner=0;a.hug=true;hugT=3.5;a.stuck=false;a.hopT=0;say(me,'꼭 안았어요 \u{1F495}',2500);continue}}
-  else if(d>=.7||!a.stuck)a.corner=0;
+   else{a.stuck=true;a.hopT=0}}
+  // 도망쳐도 너무 가까워지면(막다른 곳 등) 잠깐 뒤 안기
+  if(d<.58&&!hugT&&a.eat<=0&&a.calm<=0&&!want){a.corner+=dt;if(a.corner>=.35){a.corner=0;a.hug=true;hugT=3.5;a.stuck=false;a.hopT=0;say(me,'꼭 안았어요 \u{1F495}',2500);continue}}
+  else if(d>=.58)a.corner=0;
   a.g.position.x=a.x;a.g.position.z=a.z;
   if(moved){a.g.position.y=Math.abs(Math.sin(T*18))*(a.type==='chick'?.07:.12);const ty=Math.atan2(vx,vz);let da=ty-a.g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));a.g.rotation.y+=da*Math.min(1,dt*14)}
   else if(a.eat<=0)a.g.position.y=0}
