@@ -219,7 +219,10 @@ function person(o){if(o.outfit==='acnl'||o.outfit==='boyStyle')return villager(o
  const hr=kid?.36:.23,hy=kid?1.02:1.12,hip=kid?.4:.46,ax=kid?.25:.19,ay=kid?.76:.86;
  const sp=o.outfit==='spider',rc=o.outfit==='rain',ac=o.outfit==='acnl',bsy=o.outfit==='boyStyle',bo=bsy||(o.g==='m'&&!ac),TCm=kid?(sp?webMat():m(rc?'#f5c842':ac?'#e63946':bsy?'#fcfbf7':white)):null,HC=sp?m('#8f1519'):m(rc?'#e0b030':ac?'#e63946':bsy?'#5d7a37':'#ecedf4'),BC=sp?'#2b4b9b':rc?'#3d6fb5':bsy?'#6b3e2e':bo?'#52739f':'#6f95c4';
  // 부드러운 앞머리 (지그재그 없음)
- const fringe=k=>[-1,1].forEach(sd=>A(SP(.17*k,1,.55,.55),o.hair,sd*.1*k,kid?hy+.2:hy+.128,kid?.25:.16,null,.3,-sd*.5));
+ const fringe=k=>[-1,1].forEach(sd=>{const big=sd<0;A(SP(.17*k*(big?2:1),1,.55*(big?.75:1),.55*(big?.9:1)),o.hair,(sd*.1+.08)*k,(kid?hy+.2:hy+.128)+(big?.02*k:0),(kid?.25:.16)+(big?.01:0),null,.3,-sd*.5)});
+ const gHair=(r,cy,cz,sy,sz,th)=>{const hmat=new THREE.MeshLambertMaterial({color:o.hair,side:THREE.DoubleSide});
+  const a=new THREE.SphereGeometry(r+.006,36,20,0,Math.PI*2,0,1.2);a.scale(1,sy,sz);A(a,hmat,0,cy,cz);
+  const b=new THREE.SphereGeometry(r,36,20,Math.PI/2+.85,Math.PI*2-1.7,0,th);b.scale(1,sy,sz);A(b,hmat,0,cy,cz)};
  // 머리, 귀
  A(SP(hr,1,.95,1),o.skin,0,hy,0);
  [-1,1].forEach(s=>A(SP(kid?.075:.045,.5,1,1),o.skin,s*hr,hy-.02,0));
@@ -232,7 +235,7 @@ function person(o){if(o.outfit==='acnl'||o.outfit==='boyStyle')return villager(o
  const mo=A(new THREE.TorusGeometry(kid?.07:.045,kid?.012:.008,6,16,Math.PI),kid?'#d6453d':'#c9625a',0,hy-(kid?.06:.065),kid?.345:.215);mo.rotation.z=Math.PI;
  // 머리카락
  const lock=(r,h,x,y,z)=>[-1,1].forEach(s=>{const q=new THREE.ConeGeometry(r,h,6);q.rotateX(Math.PI);q.scale(.5,1,1.1);A(q,o.hair,s*x,y,z,null,0,-s*.12)});
- if(kid){A(new THREE.SphereGeometry(.397,20,14,0,Math.PI*2,0,1.75),o.hair,0,hy+.03,-.05);A(new THREE.SphereGeometry(.4,20,14,Math.PI+.12,Math.PI-.24,0,(bo&&!bsy)?2.1:2.6),o.hair,0,hy+.03,-.05);if(bsy){[-1,1].forEach(s=>A(SP(.16,1,.28,.45),o.hair,s*.13,hy+.15,.26,null,.3,-s*.55));lock(.045,.22,.32,hy-.065,.17)}else if(!bo)fringe(1);
+ if(kid){if(!bo)gHair(.397,hy+.03,-.05,1,1,2.6);else{A(new THREE.SphereGeometry(.397,20,14,0,Math.PI*2,0,1.75),o.hair,0,hy+.03,-.05);A(new THREE.SphereGeometry(.4,20,14,Math.PI+.12,Math.PI-.24,0,(bo&&!bsy)?2.1:2.6),o.hair,0,hy+.03,-.05)}if(bsy){[-1,1].forEach(s=>A(SP(.16,1,.28,.45),o.hair,s*.13,hy+.15,.26,null,.3,-s*.55));lock(.045,.22,.32,hy-.065,.17)}else if(!bo)fringe(1);
   if(o.hat==='bunny'){const w='#fdfdfd';A(new THREE.TorusGeometry(.405,.03,6,24,Math.PI),w,0,hy+.03,-.02);
    [-1,1].forEach(s=>{const e=A(SP(.085,.9,4.2,.6),w,s*.13,hy+.74,-.02);e.rotation.z=-s*.12;const i=A(SP(.06,.6,3.6,.35),'#ffb6c8',s*.13,hy+.72,.02);i.rotation.z=-s*.12})}
   else if(o.hat==='cat'){const bk='#3a3a3a';A(new THREE.TorusGeometry(.405,.022,6,24,Math.PI),bk,0,hy+.03,-.02);
@@ -241,9 +244,7 @@ function person(o){if(o.outfit==='acnl'||o.outfit==='boyStyle')return villager(o
    const lf=A(BX(.14,.03,.09),'#52b788',fx*.97,fy-.01,-.05+(fz+.05)*.97);lf.rotation.y=-ang;A(SP(.065,1,.55,1),fc[i%5],fx,fy+.02,fz);A(SP(.027),'#fffae6',fx,fy+.05,fz)}}
   else if(o.hat==='crown'){const gm=new THREE.MeshLambertMaterial({color:'#f2c14e',side:THREE.DoubleSide});A(new THREE.CylinderGeometry(.29,.3,.12,18,1,true),gm,0,hy+.3,-.04);
    for(let i=0;i<7;i++){const a=i/7*Math.PI*2;A(new THREE.ConeGeometry(.045,.13,5),gm,Math.sin(a)*.29,hy+.42,-.04+Math.cos(a)*.29)}}}
- else{A((()=>{const q=new THREE.SphereGeometry(.246,20,14,0,Math.PI*2,0,1.75);q.scale(1,1.03,1.03);return q})(),o.hair,0,hy+.015,-.03);A((()=>{const q=new THREE.SphereGeometry(.249,20,14,Math.PI+.12,Math.PI-.24,0,2.65);q.scale(1,1.03,1.03);return q})(),o.hair,0,hy+.015,-.03);if(o.bun)fringe(.64);
-
-  else[-1,1].forEach(s=>A(SP(.05,.6,1,.8),o.hair,s*.225,hy,-.02))}
+ else{if(o.bun){gHair(.246,hy+.015,-.03,1.03,1.03,2.65);fringe(.64)}else{A((()=>{const q=new THREE.SphereGeometry(.246,20,14,0,Math.PI*2,0,1.75);q.scale(1,1.03,1.03);return q})(),o.hair,0,hy+.015,-.03);A((()=>{const q=new THREE.SphereGeometry(.249,20,14,Math.PI+.12,Math.PI-.24,0,2.65);q.scale(1,1.03,1.03);return q})(),o.hair,0,hy+.015,-.03);[-1,1].forEach(s=>A(SP(.05,.6,1,.8),o.hair,s*.225,hy,-.02))}}
  // 몸
  if(kid){A(CY(.19,.235,.42,18),TCm,0,.64,0);A(CY(.238,.238,.05,18),HC,0,.43,0);
   if(ac){A(BX(.24,.14,.04),'#e63946',0,.75,.21);A(SP(.06,1.4,.8,.8),'#ffffff',0,.83,.2);[-1,1].forEach(s=>A(BX(.12,.07,.03),'#ffffff',s*.09,.83,.2,null,0,s*.3));
@@ -393,9 +394,12 @@ function route(a,b){const N=[a,b,...HB],d=N.map(()=>1e9),pv=N.map(()=>-1),dn=N.m
  if(pv[1]<0)return[P(b[0],b[1])];
  const o=[];let i=1;while(i>0){o.unshift(P(N[i][0],N[i][1]));i=pv[i]}return o}
 const go=(x,y)=>walk(route(PX(me.g.position),[x,y]));
-function run(fn){const t=++token;releaseHug();me.sitY=.07;if(pr){pr(false);pr=null}path=[];me.mode='idle';man.mode='idle';doc.mode='idle';doc.g.rotation.y=0;fn(t)}
+let recCnt=0,recT=0,recBlock=0;
+function run(fn){if(fn!==recep)recCnt=0;const t=++token;releaseHug();me.sitY=.07;if(pr){pr(false);pr=null}path=[];me.mode='idle';man.mode='idle';doc.mode='idle';doc.g.rotation.y=0;fn(t)}
 const face=a=>me.g.rotation.y=a;
-async function recep(t){if(!await go(80,336))return;face(Math.PI);me.mode='wave';man.mode='wave';
+async function recep(t){const now=Date.now();if(now<recBlock)return;if(now-recT>4000)recCnt=0;recT=now;
+ if(++recCnt>=22){recCnt=0;recBlock=now+10000;say(man,'그므흐르',3000);return}
+ if(!await go(80,336))return;face(Math.PI);me.mode='wave';man.mode='wave';
  say(man,'안녕하세요! 어서 오세요 😊');say(me,'안녕하세요~! 👋',2200);await sleep(2700);if(t!==token)return;
  me.mode='idle';man.mode='idle';say(man,'뒤쪽 게시판에서 소식도 확인해 보세요!',3000)}
 function panel(t,items){document.getElementById('pt').textContent=t;document.getElementById('pb').innerHTML=items.map(i=>'<li>'+i+'</li>').join('');pn.style.display='flex'}
