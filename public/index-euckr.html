@@ -58,7 +58,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 </style></head><body>
 <canvas id="c"></canvas><div id="B"></div><div id="fl" style="position:fixed;inset:0;background:#fff;opacity:0;transition:opacity .5s;pointer-events:none"></div>
 <div id="top"><b>&#x1F3E5; 메타 달소아청소년과</b><small>바닥을 터치하면 걸어가요 · 풀·나무를 터치하면 다가가서 얻어요 · 드래그: 좌우 회전 · 상하 각도</small></div>
-<div id="dp"><button data-k="u" style="grid-area:1/2">▲</button><button data-k="l" style="grid-area:2/1">◀</button><button data-k="r" style="grid-area:2/3">▶</button><button data-k="d" style="grid-area:3/2">▼</button></div>
+<div id="dp"><button data-k="ul" style="grid-area:1/1">↖</button><button data-k="u" style="grid-area:1/2">▲</button><button data-k="ur" style="grid-area:1/3">↗</button><button data-k="l" style="grid-area:2/1">◀</button><button data-k="r" style="grid-area:2/3">▶</button><button data-k="dl" style="grid-area:3/1">↙</button><button data-k="d" style="grid-area:3/2">▼</button><button data-k="dr" style="grid-area:3/3">↘</button></div>
 <div id="bar">
 <button onclick="run(recep)">&#x1F44B; 접수하기</button>
 <button onclick="run(news1)">&#x1F4CB; 소식 보기</button>
@@ -102,7 +102,7 @@ fbox(0,0,341,413,.1,'#9b9b9f',-.1);
 fbox(0,0,188,184,.02,'#f6d58a');fbox(0,188,188,313,.02,'#9ccbff');fbox(341,0,512,163,.1,'#f0b0cf',-.1);
 // 벽
 const W='#fbf6ee';
-const hw=(x1,y1,x2,y2,h,c)=>{const m=box(x1,y1,x2,y2,h,c);m.material=new THREE.MeshLambertMaterial({color:c,transparent:true,opacity:.35,depthWrite:false});m.renderOrder=1;return m};
+const hw=(x1,y1,x2,y2,h,c)=>{const m=box(x1,y1,x2,y2,h,c);m.material=new THREE.MeshLambertMaterial({color:c,transparent:true,opacity:.5,depthWrite:false});m.renderOrder=1;return m};
 hw(341,-6,518,0,2.4,W);hw(-6,0,0,413,2.4,W);hw(512,0,518,163,2.4,W);box(0,184,188,192,1.2,W);
 box(341,163,518,169,.6,W);hw(335,163,341,205,2.4,W);hw(335,280,341,413,2.4,W);
 // 게시판
@@ -166,6 +166,7 @@ function villager(o){
  }else{
   const c1=new THREE.Mesh(cap(.4,0,2*P2,0,1.15,1.03,1,1.03),hm);c1.position.set(cx,cy,cz);g.add(c1);
   const c2=new THREE.Mesh(cap(.405,P2/2+.85,2*P2-1.7,0,1.85,1.03,1,1.03),hm);c2.position.set(cx,cy,cz);g.add(c2);
+  const bg=new THREE.Mesh(new THREE.CylinderGeometry(.385,.39,.09,30,1,true,-1.05,2.1),hm);bg.position.set(0,hy+.158,-.01);g.add(bg);
  }
  // ---- 모자
  if(o.hat==='bunny'){const w='#fdfdfd';A(new THREE.TorusGeometry(.405,.03,6,24,P2),w,0,hy+.03,-.02);
@@ -467,8 +468,8 @@ function dpadMove(dt){const dx=held.r-held.l,dy=held.u-held.d;
  if(q){const w=P(q[0],q[1]);p.x=w.x;p.z=w.z}
  let da=Math.atan2(vx,vz)-me.g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));me.g.rotation.y+=da*Math.min(1,dt*14);return true}
 document.querySelectorAll('#dp button').forEach(b=>{const k=b.dataset.k;
- b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);if(!wasH)stopAll();held[k]=1});
- ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>held[k]=0))});
+ b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);if(!wasH)stopAll();for(const c of k)held[c]=1});
+ ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>{for(const c of k)held[c]=0}))});
 const KM={ArrowUp:'u',w:'u',ArrowDown:'d',s:'d',ArrowLeft:'l',a:'l',ArrowRight:'r',d:'r'};
 addEventListener('keydown',e=>{const k=KM[e.key];if(k){if(!wasH)stopAll();held[k]=1;e.preventDefault()}});
 addEventListener('keyup',e=>{const k=KM[e.key];if(k)held[k]=0});
