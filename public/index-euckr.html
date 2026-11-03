@@ -459,13 +459,14 @@ const ANIM={tick(dt){
 const MP=(()=>{
  const q=new URLSearchParams(location.search);
  const url=q.get('ws')||window.WS_URL||((location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws');
+ const VER='v3';
  const R=new Map();let ws=null,myId=null,tries=0,opened=false,lastSent='',acc=0;
- const stat=document.createElement('div');stat.id='mps';stat.textContent='\u{26AA} 오프라인';document.body.appendChild(stat);
+ const stat=document.createElement('div');stat.id='mps';stat.textContent='\u{26AA} 오프라인 · '+VER;document.body.appendChild(stat);
  const rd=v=>Math.round(v*1000)/1000;
  const info=()=>({x:rd(me.g.position.x),z:rd(me.g.position.z),ry:rd(me.g.rotation.y),m:me.mode,sy:me.sitY??.07,n:myName,c:{g:cz.g,h:cz.h,o:cz.o}});
  const mkOpts=c=>({kind:'kid',g:c.g,hat:c.h,outfit:c.o,skin:'#fbd3bd',hair:'#2a2420'});
  const book=g=>{const b=new THREE.Mesh(new THREE.BoxGeometry(.3,.2,.04),M('#6aa5e8'));b.position.set(0,.68,.3);b.rotation.x=.9;b.visible=false;g.add(b);return b};
- function stat2(){stat.textContent='\u{1F7E2} '+(R.size+1)+'명 접속 중'}
+ function stat2(){stat.textContent='\u{1F7E2} '+(R.size+1)+'명 접속 중 · '+VER}
  function apply(p,d){if(d.n&&p.tag&&d.n!==p.nm){p.nm=d.n;setName(p.tag,d.n)}p.tx=d.x;p.tz=d.z;p.try=d.ry;p.mode=d.m;p.sy=d.sy;
   const cs=JSON.stringify(d.c);
   if(cs!==p.cs){p.cs=cs;const g0=p.g,pos=g0.position.clone(),ry=g0.rotation.y;S.remove(g0);Object.assign(p,person(mkOpts(d.c)));p.mode=d.m;p.g.rotation.order='YXZ';p.g.position.copy(pos);p.g.rotation.y=ry;p.book=book(p.g)}}
@@ -481,7 +482,7 @@ const MP=(()=>{
    else if(m.t==='u'&&m.id!==myId)add(m)
    else if(m.t==='s'){const p=R.get(m.id);if(p)say(p,m.s,m.ms)}
    else if(m.t==='bye')rem(m.id)};
-  ws.onclose=()=>{[...R.keys()].forEach(rem);stat.textContent='\u{26AA} 오프라인';retry()};
+  ws.onclose=()=>{[...R.keys()].forEach(rem);stat.textContent='\u{26AA} 오프라인 · '+VER;retry()};
   ws.onerror=()=>{}}
  function retry(){tries++;if(!opened&&tries>3)return;setTimeout(connect,Math.min(30000,1500*tries))}
  window.MPsay=(txt,ms)=>{if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'s',s:txt,ms}))};

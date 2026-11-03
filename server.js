@@ -25,7 +25,7 @@ const server = http.createServer((req, res) => {
     if (err) { res.writeHead(404); return res.end('not found'); }
     let type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream';
     if (/euckr/i.test(path.basename(file))) type = 'text/html; charset=euc-kr';
-    res.writeHead(200, { 'Content-Type': type, 'Cache-Control': path.basename(file) === 'sw.js' ? 'no-cache' : 'public, max-age=300' });
+    res.writeHead(200, { 'Content-Type': type, 'Cache-Control': /\.html$|^sw\.js$/i.test(path.basename(file)) ? 'no-cache' : 'public, max-age=86400' });
     res.end(data);
   });
 });
