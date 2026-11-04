@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 // public 폴더가 있으면 거기서, 없으면(파일을 폴더 없이 올린 경우) 이 폴더에서 화면 파일을 서빙
 const PUB = path.join(__dirname, 'public');
 const ROOT = fs.existsSync(PUB) ? PUB : __dirname;
-const DENY = new Set(['server.js', 'package.json', 'package-lock.json', 'readme.txt', 'readme.md']);
+const DENY = new Set(['staff.json', 'server.js', 'package.json', 'package-lock.json', 'readme.txt', 'readme.md']);
 const MAX_PLAYERS = 50;
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -29,6 +29,19 @@ const server = http.createServer((req, res) => {
     res.end(data);
   });
 });
+
+// ---------- 선생님 이름표 (모든 접속자에게 공유, staff.json 에 저장) ----------
+const STAFF_FILE = path.join(__dirname, 'staff.json');
+const STAFF_DEF = { doc: '의사선생님', man: '접수선생님', nu1: '주사선생님민트', nu2: '주사선생님핑크', rad: '방사선선생님' };
+const STAFF_PIN = '090909';
+const staff = {};
+for (const k in STAFF_DEF) staff[k] = { on: false, name: STAFF_DEF[k] };
+try {
+  const saved = JSON.parse(fs.readFileSync(STAFF_FILE, 'utf8'));
+  for (const k in STAFF_DEF) if (saved[k]) staff[k] = { on: !!saved[k].on, name: String(saved[k].name || STAFF_DEF[k]).slice(0, 24) };
+} catch {}
+let staffTimer = null;
+function saveStaff() { clearTimeout(staffTimer); staffTimer = setTimeout(() => fs.writeFile(STAFF_FILE, JSON.stringify(staff), () => {}), 300); }
 
 // ---------- 멀티플레이 ----------
 const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 2048 });
@@ -60,7 +73,7 @@ wss.on('connection', ws => {
   ws.pid = id; ws.alive = true; ws.seen = false; ws.cnt = 0; ws.lastSay = 0;
   const me = { id, n: '친구' + id, x: 0.2, z: 4, ry: Math.PI, m: 'idle', sy: 0.07, c: { g: 'f', h: 'none', o: 'basic' }, hd: '', hg: -1 };
   players.set(id, me);
-  send(ws, { t: 'hello', id, players: [...players.values()].filter(p => p.id !== id && p.seen) });
+  send(ws, { t: 'hello', id, players: [...players.values()].filter(p => p.id !== id && p.seen), staff });
 
   ws.on('pong', () => { ws.alive = true; });
   ws.on('message', raw => {
@@ -70,6 +83,12 @@ wss.on('connection', ws => {
       Object.assign(me, clean(m)); me.seen = true;
       if (typeof m.n === 'string') { const nn = m.n.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 24); if (nn) me.n = nn; }
       broadcast({ t: 'u', id, n: me.n, x: me.x, z: me.z, ry: me.ry, m: me.m, sy: me.sy, c: me.c }, ws);
+    } else if (m.t === 'staff') {
+      if (m.pin !== STAFF_PIN || !(m.k in STAFF_DEF) || typeof m.on !== 'boolean') return;
+      const nm = typeof m.name === 'string' ? m.name.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 24) : '';
+      staff[m.k] = { on: m.on, name: nm || STAFF_DEF[m.k] };
+      saveStaff();
+      broadcast({ t: 'staff', k: m.k, on: staff[m.k].on, name: staff[m.k].name });
     } else if (m.t === 'rel') {
       for (const a of ANIMALS) if (a.hug === id) releaseAnimal(a);
     } else if (m.t === 's' && typeof m.s === 'string') {
