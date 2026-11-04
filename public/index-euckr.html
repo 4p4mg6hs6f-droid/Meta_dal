@@ -482,6 +482,8 @@ const STAFF=[['doc','의사선생님',()=>doc],['man','접수선생님',()=>man],['nu1','�
 let stf={};try{stf=JSON.parse(localStorage.getItem('dkstaff')||'{}')||{}}catch(e){}
 const stTag={};
 function stSave(){try{localStorage.setItem('dkstaff',JSON.stringify(stf))}catch(e){}}
+function stPush(k){const c=stCfg(k);MP.send({t:'staff',pin:'090909',k,on:!!c.on,name:c.name})}   // 서버에 저장 → 모든 접속자에게 전달
+function stRemote(map){for(const k in map){const d=STAFF.find(x=>x[0]===k),v=map[k];if(!d||!v)continue;stf[k]={on:!!v.on,name:String(v.name||d[1]).slice(0,24)};stApply(k)}stSave()}
 function stCfg(k){const d=STAFF.find(x=>x[0]===k);return stf[k]||(stf[k]={on:false,name:d[1]})}
 function stApply(k){const d=STAFF.find(x=>x[0]===k),c=stCfg(k);
  if(stTag[k]){stTag[k].e.remove();const i=bs.indexOf(stTag[k]);if(i>=0)bs.splice(i,1);stTag[k]=null}
@@ -495,8 +497,8 @@ function openPin(){pin='';pinRender()}
 function openStaff(){setBody('\u{1F9D1}\u{200D}\u{2695}\u{FE0F} 선생님 이름표','<li>이름표를 켜고 끌 수 있고, 글자도 바꿀 수 있어요.</li>'+STAFF.map(d=>{const c=stCfg(d[0]);return '<li><button class="chip stf" onclick="stEdit(\''+d[0]+'\')"><span>'+d[1]+'</span><i>'+(c.on?'켜짐 · '+c.name.replace(/</g,'&lt;'):'꺼짐')+'</i></button></li>'}).join(''))}
 function stEdit(k){const d=STAFF.find(x=>x[0]===k),c=stCfg(k);
  setBody(d[1],'<li><button class="chip'+(c.on?' on':'')+'" onclick="stToggle(\''+k+'\')">이름표 '+(c.on?'켜짐 (눌러서 끄기)':'꺼짐 (눌러서 켜기)')+'</button></li><li>이름표에 쓸 글자</li><li><input id="sti" maxlength="24" value="'+c.name.replace(/"/g,'&quot;')+'" placeholder="이름표 글자 (최대 24글자)"></li><li><button class="chip on" onclick="stSaveName(\''+k+'\')">저장</button><button class="chip" onclick="openStaff()">← 목록</button></li>')}
-function stToggle(k){const c=stCfg(k),i=document.getElementById('sti');if(i&&i.value.trim())c.name=i.value.trim().slice(0,24);c.on=!c.on;stSave();stApply(k);stEdit(k)}
-function stSaveName(k){const c=stCfg(k),v=document.getElementById('sti').value.trim().slice(0,24);if(v)c.name=v;stSave();stApply(k);openStaff()}
+function stToggle(k){const c=stCfg(k),i=document.getElementById('sti');if(i&&i.value.trim())c.name=i.value.trim().slice(0,24);c.on=!c.on;stSave();stApply(k);stPush(k);stEdit(k)}
+function stSaveName(k){const c=stCfg(k),v=document.getElementById('sti').value.trim().slice(0,24);if(v)c.name=v;stSave();stApply(k);stPush(k);openStaff()}
 const NEWS=[
  cdh('\u{1F558} 진료 시간',rw('월 · 화 · 금','오전 9:00 ~ 오후 6:00<br>(점심 오후 1:00 ~ 2:00)')+rw('수요일','오후 2:00 ~ 오후 6:00')+rw('목요일','휴진')+rw('토요일','오전 8:00 ~ 12:00')+rw('일요일 · 공휴일','휴진')),
  cdh('\u{1F6AB} 휴진 시간',rw('점심','오후 1:00 ~ 오후 2:00')+rw('수요일','오전 휴진')+rw('목요일','휴진')+'<p class="nt">공휴일 및 목요일, 일요일은 휴진입니다.</p>'),
@@ -714,7 +716,8 @@ const MP=(()=>{
  function connect(){try{ws=new WebSocket(url)}catch(e){retry();return}
   ws.onopen=()=>{opened=true;tries=0;lastSent='';stat2()};
   ws.onmessage=ev=>{let m;try{m=JSON.parse(ev.data)}catch(e){return}
-   if(m.t==='hello'){myId=m.id;m.players.forEach(add)}
+   if(m.t==='hello'){myId=m.id;m.players.forEach(add);if(m.staff)stRemote(m.staff)}
+   else if(m.t==='staff'){stRemote({[m.k]:{on:m.on,name:m.name}})}
    else if(m.t==='u'&&m.id!==myId)add(m)
    else if(m.t==='an'){lastAn=performance.now();m.a.forEach((d,i)=>{const a=AN[i];if(!a)return;if(a.nx===undefined){a.x=d[0];a.z=d[1]}a.nx=d[0];a.nz=d[1];a.nmv=d[2];a.hugBy=d[3]})}
    else if(m.t==='eat'){const a=AN[m.a];if(a){say(a,'냠냠 \u{1F60B}',2000);if(m.p===myId){holding=null;attachHeld();pickT=1.5;mission(a.type==='rabbit'?'rabbit':'squirrel');say(me,a.type==='rabbit'?'토끼야, 풀 먹어~ \u{1F33F}':'다람쥐야, 도토리 먹어~ \u{1F330}',2200)}}}
