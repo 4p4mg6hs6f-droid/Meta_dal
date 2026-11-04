@@ -585,11 +585,22 @@ hacorn.position.set(0,-.42,.05);
 function attachHeld(){me.armR.add(hgrass);me.armR.add(hacorn);hgrass.position.set(0,me.holdY||-.38,.05);hacorn.position.set(0,me.holdY?me.holdY-.04:-.42,.05);hgrass.visible=holding==='grass';hacorn.visible=holding==='acorn'}
 attachHeld();
 function releaseHug(){if(hugT>0){hugT=0;doRelease()}}
-function doRelease(){AN.forEach(a=>{if(a.hug){a.hug=false;a.calm=1.5;a.corner=0;const f=me.g.rotation.y;let nx=me.g.position.x,nz=me.g.position.z;
+function doRelease(){if(MP.live()){MP.send({t:'rel'});if(me.mode==='hug')me.mode='idle';return}
+ AN.forEach(a=>{if(a.hug){a.hug=false;a.calm=1.5;a.corner=0;const f=me.g.rotation.y;let nx=me.g.position.x,nz=me.g.position.z;
   outer:for(const dd of [.8,1.1,1.5])for(const off of [0,1.57,-1.57,3.14,.8,-.8]){const x=me.g.position.x+Math.sin(f+off)*dd,z=me.g.position.z+Math.cos(f+off)*dd;if(free(x,z)){nx=x;nz=z;break outer}}
   a.x=nx;a.z=nz;a.g.position.set(a.x,0,a.z)}});if(me.mode==='hug')me.mode='idle'}
 const free=(x,z)=>{if(!(x>ARENA.x1+.25&&x<ARENA.x2-.25&&z>ARENA.z1+.25&&z<ARENA.z2-.25))return false;if(treePos.some(t=>Math.hypot(x-t.x,z-t.z)<=.4))return false;const q=PX({x,z});return !inBldP(q[0],q[1],14)};
 const FLEE=3.2;
+// 서버가 계산한 동물 위치를 그대로 따라가기 (모든 접속자에게 같은 위치)
+function netAnimal(a,dt){
+ if(a.hugBy){const hp=a.hugBy===MP.myId()?me:MP.R.get(a.hugBy);
+  if(hp){const f=hp.g.rotation.y;a.g.position.set(hp.g.position.x+Math.sin(f)*.32,.62,hp.g.position.z+Math.cos(f)*.32);a.g.rotation.y=f+Math.PI;a.x=hp.g.position.x;a.z=hp.g.position.z;return}}
+ if(a.nx===undefined)return;
+ const ox=a.x,oz=a.z,k=Math.min(1,dt*12);a.x+=(a.nx-a.x)*k;a.z+=(a.nz-a.z)*k;a.g.position.x=a.x;a.g.position.z=a.z;
+ const dx=a.x-ox,dz=a.z-oz,mv=(a.nmv&1)||Math.hypot(dx,dz)>dt*.8;
+ if(mv){a.g.position.y=Math.abs(Math.sin(T*18))*(a.type==='chick'?.07:.12);if(Math.hypot(dx,dz)>1e-4){const ty=Math.atan2(dx,dz);let da=ty-a.g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));a.g.rotation.y+=da*Math.min(1,dt*14)}}
+ else if(a.nmv&2)a.g.position.y=Math.abs(Math.sin(T*14))*.03;
+ else a.g.position.y=0}
 const ANIM={tick(dt){
  const mx=me.g.position.x,mz=me.g.position.z,px=PX(me.g.position);
  // 병원 안으로 들고 들어가면 떨어뜨리기
@@ -597,8 +608,12 @@ const ANIM={tick(dt){
   say(me,holding==='grass'?'병원엔 풀을 못 가져가요! 떨어뜨렸어요 🌿':'병원엔 도토리를 못 가져가요! 떨어뜨렸어요 🌰',2600);holding=null;attachHeld();pickT=1.5}
  pickT=Math.max(0,pickT-dt);
  // 안기
- if(hugT>0){hugT-=dt;if(me.mode==='idle')me.mode='hug';if(hugT<=0)doRelease()}
+ const net=MP.live();
+ if(!net&&ANIM.wasNet){ANIM.wasNet=false;AN.forEach(a=>{a.hug=false;a.hugBy=0});hugT=0;if(me.mode==='hug')me.mode='idle'}
+ if(net)ANIM.wasNet=true;
+ if(hugT>0){if(!net)hugT-=dt;if(me.mode==='idle')me.mode='hug';if(hugT<=0&&!net)doRelease()}
  for(const a of AN){
+  if(net){netAnimal(a,dt);continue}
   if(a.hug){const f=me.g.rotation.y;a.g.position.set(mx+Math.sin(f)*.32,.62,mz+Math.cos(f)*.32);a.g.rotation.y=f+Math.PI;continue}
   const dx=mx-a.x,dz=mz-a.z,d=Math.hypot(dx,dz)||.001;
   a.calm=Math.max(0,a.calm-dt);const want=(a.type==='rabbit'&&holding==='grass')||(a.type==='squirrel'&&holding==='acorn');
@@ -635,7 +650,8 @@ const MP=(()=>{
  const R=new Map();let ws=null,myId=null,tries=0,opened=false,lastSent='',acc=0;
  const stat=document.createElement('div');stat.id='mps';stat.textContent='⚪ 오프라인 · '+VER;document.body.appendChild(stat);
  const rd=v=>Math.round(v*1000)/1000;
- const info=()=>({x:rd(me.g.position.x),z:rd(me.g.position.z),ry:rd(me.g.rotation.y),m:me.mode,sy:me.sitY??.07,n:myName,c:{g:cz.g,h:cz.h,o:cz.o}});
+ const info=()=>({x:rd(me.g.position.x),z:rd(me.g.position.z),ry:rd(me.g.rotation.y),m:me.mode,sy:me.sitY??.07,n:myName,hd:holding||'',c:{g:cz.g,h:cz.h,o:cz.o}});
+ let lastAn=-1e9;
  const mkOpts=c=>({kind:'kid',g:c.g,hat:c.h,outfit:c.o,skin:'#fbd3bd',hair:'#2a2420'});
  const book=g=>{const b=new THREE.Mesh(new THREE.BoxGeometry(.3,.2,.04),M('#6aa5e8'));b.position.set(0,.68,.3);b.rotation.x=.9;b.visible=false;g.add(b);return b};
  function stat2(){stat.textContent='🟢 '+(R.size+1)+'명 접속 중 · '+VER}
@@ -652,6 +668,10 @@ const MP=(()=>{
   ws.onmessage=ev=>{let m;try{m=JSON.parse(ev.data)}catch(e){return}
    if(m.t==='hello'){myId=m.id;m.players.forEach(add)}
    else if(m.t==='u'&&m.id!==myId)add(m)
+   else if(m.t==='an'){lastAn=performance.now();m.a.forEach((d,i)=>{const a=AN[i];if(!a)return;if(a.nx===undefined){a.x=d[0];a.z=d[1]}a.nx=d[0];a.nz=d[1];a.nmv=d[2];a.hugBy=d[3]})}
+   else if(m.t==='eat'){const a=AN[m.a];if(a){say(a,'냠냠 😋',2000);if(m.p===myId){holding=null;attachHeld();pickT=1.5;say(me,a.type==='rabbit'?'토끼야, 풀 먹어~ 🌿':'다람쥐야, 도토리 먹어~ 🌰',2200)}}}
+   else if(m.t==='hug'){const a=AN[m.a];if(a){a.hugBy=m.p;if(m.p===myId){hugT=3.5;say(me,'꼭 안았어요 💕',2500)}}}
+   else if(m.t==='rel'){const a=AN[m.a];if(a){a.hugBy=0;a.x=a.nx=m.x;a.z=a.nz=m.z;if(m.p===myId){hugT=0;if(me.mode==='hug')me.mode='idle'}}}
    else if(m.t==='s'){const p=R.get(m.id);if(p)say(p,m.s,m.ms)}
    else if(m.t==='bye')rem(m.id)};
   ws.onclose=()=>{[...R.keys()].forEach(rem);stat.textContent='⚪ 오프라인 · '+VER;retry()};
@@ -665,7 +685,7 @@ const MP=(()=>{
    let da=p.try-g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));g.rotation.y+=da*Math.min(1,dt*12);
    const m=p.mode;g.position.y=m==='lie'?.8:(m==='sit'||m==='read')?(p.sy??.07):m==='walk'?Math.abs(Math.sin(T*10))*.05:0;
    g.rotation.x=m==='lie'?-Math.PI/2:0;if(p.book)p.book.visible=m==='read';pose(p,T)})}
- connect();return{tick,R}})();
+ connect();return{tick,R,live:()=>performance.now()-lastAn<2500,myId:()=>myId,send:o=>{if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}}})();
 // 루프
 function pose(p,t){[p.armL,p.armR,p.legL,p.legR].forEach(a=>a.rotation.set(0,0,0));const m=p.mode;
  if(m=='walk'){const s=Math.sin(t*10);p.legL.rotation.x=s*.7;p.legR.rotation.x=-s*.7;p.armL.rotation.x=-s*.6;p.armR.rotation.x=s*.6}
