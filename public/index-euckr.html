@@ -33,7 +33,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 @keyframes mqs{to{transform:translateX(-50%)}}
 .b.tag.mine .nm{pointer-events:auto;cursor:pointer}
 #pn input{width:100%;box-sizing:border-box;padding:9px 10px;border-radius:10px;border:1px solid rgba(127,127,127,.4);background:transparent;color:var(--fg);font-size:16px;-webkit-user-select:text;user-select:text}
-#exb{position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);border:0;background:#ff6b6b;color:#fff;padding:9px 14px;border-radius:18px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
+#exb{position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);border:0;background:#ff6b6b;color:#fff;padding:9px 12px;border-radius:18px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
 #bye{position:fixed;inset:0;z-index:200;background:#cfe8f5;color:#2b2b2b;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:30px;font-size:17px}
 #bye button{border:0;background:#ff8fb1;color:#fff;padding:10px 20px;border-radius:14px;font-size:15px;cursor:pointer}
 #dp{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 74px);width:126px;height:126px;border-radius:50%;background:var(--btn);box-shadow:0 1px 6px rgba(0,0,0,.28);opacity:.92;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -45,8 +45,15 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 #pn header button{border:0;background:var(--ac);color:#fff;padding:6px 12px;border-radius:12px;font-size:13px;cursor:pointer;flex:none}
 #pn .chip{border:1px solid rgba(127,127,127,.4);background:transparent;color:var(--fg);border-radius:14px;padding:6px 11px;margin:4px 6px 2px 0;font-size:13px;cursor:pointer}
 #pn .chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-#mps{position:fixed;left:12px;top:calc(env(safe-area-inset-top,0px) + 78px);background:var(--card);color:var(--fg);padding:3px 9px;border-radius:10px;font-size:12px;pointer-events:none}
-#czb{position:fixed;right:100px;top:calc(env(safe-area-inset-top,0px) + 10px);border:0;background:var(--btn);color:var(--fg);padding:9px 14px;border-radius:18px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
+#trow{display:flex;align-items:center;gap:4px;flex-wrap:wrap;max-width:calc(100% - 80px)}#mps{background:var(--card);color:var(--fg);padding:5px 7px;border-radius:12px;font-size:11px;pointer-events:none;white-space:nowrap}
+#mm{flex:1;min-width:0}#msn em{font-style:normal;opacity:.6;flex:none;font-variant-numeric:tabular-nums}
+#czb{position:fixed;right:58px;top:calc(env(safe-area-inset-top,0px) + 10px);border:0;background:var(--btn);color:var(--fg);padding:9px 12px;border-radius:18px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
+#pn .mh{display:flex;align-items:center;gap:8px;font-weight:700}#pn .mh i{margin-left:auto;font-style:normal;opacity:.6;font-weight:400;font-size:12px}#pn .mi{display:flex;align-items:center;gap:8px;padding-left:4px}
+#pn .mh input,#pn .mi input{accent-color:var(--ac);width:18px;height:18px;margin:0;pointer-events:none;flex:none;box-sizing:border-box}
+#pn .pinbox{display:flex;gap:8px;justify-content:center}#pn .pinbox span{width:34px;height:42px;border:2px solid rgba(127,127,127,.5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--ac)}
+#pn .pinbox.sh{animation:shk .35s}@keyframes shk{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+#pn .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}#pn .pad button{padding:12px 0;border:1px solid rgba(127,127,127,.4);border-radius:12px;background:transparent;color:var(--fg);font-size:18px;cursor:pointer}#pn .pad button:active{background:var(--ac);color:#fff}
+#pn .stf{display:flex;width:100%;align-items:center;justify-content:space-between;margin:0}#pn .stf i{font-style:normal;opacity:.65;font-size:12px}
 #pn h3{margin:0;font-size:16px}#pn ul{list-style:none;padding:12px 14px;margin:0;overflow-y:auto;overflow-x:hidden;flex:1}#pn li{margin:8px 0}
 .cd{background:rgba(127,127,127,.12);border:1px solid rgba(127,127,127,.2);border-radius:14px;padding:12px 14px}
 .cd h4{margin:0 0 6px;font-size:15px}
@@ -58,7 +65,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 
 </style></head><body>
 <canvas id="c"></canvas><div id="B"></div><div id="fl" style="position:fixed;inset:0;background:#fff;opacity:0;transition:opacity .5s;pointer-events:none"></div>
-<div id="top"><b>&#x1F3E5; 메타 달소아청소년과</b><small id="tip"><span id="tm"></span><em id="tc"></em></small></div>
+<div id="top"><div id="trow"><b>&#x1F3E5; 메타 달소아청소년과</b></div><small id="tip"><span id="tm"></span><em id="tc"></em></small><small id="msn"><span id="mm">&#x1F3AF; 오늘의 미션</span><em id="mc"></em></small></div>
 <div id="dp"><i data-k="u">▲</i><i data-k="l">◀</i><i data-k="r">▶</i><i data-k="d">▼</i></div>
 <div id="bar">
 <button onclick="run(recep)">&#x1F44B; 접수하기</button>
@@ -73,8 +80,8 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 <button onclick="run(ledge)">&#x1F4D6; 책 읽기</button>
 </div>
 <div id="pn"><div><header><h3 id="pt"></h3><button onclick="pn.style.display='none'">&#x2715; 닫기</button></header><ul id="pb"></ul></div></div>
-<button id="czb" onclick="openCz()">&#x1F3A8; 꾸미기</button>
-<button id="exb" onclick="quitApp()">&#x23FB; 나가기</button>
+<button id="czb" onclick="openCz()" aria-label="꾸미기" title="꾸미기">&#x1F3A8;</button>
+<button id="exb" onclick="quitApp()" aria-label="나가기" title="나가기">&#x23FB;</button>
 <div id="bye"><div>&#x1F44B; 달 소아청소년과를 나왔어요</div><div style="font-size:14px;opacity:.75">이 창을 닫거나 앱을 종료해 주세요</div><button onclick="document.getElementById('bye').style.display='none'">다시 들어가기</button></div>
 <script src="three.min.js"></script>
 <script>
@@ -145,7 +152,7 @@ function blocky(o){
  const g=new THREE.Group(),P=Math.PI,girl=o.g==='bf';
  const vk=girl?'bf':'bm';
  if(!MCT[vk]){const hc=girl?'#8a2f4f':'#d8b25a',hd=girl?'#74243f':'#c29a45',sk=girl?'#e8b794':'#c9936d',sd=girl?'#d6a281':'#b8825c';
-  const pal={H:hc,h:hd,S:sk,s:sd,W:'#ffffff',I:girl?'#7a5ab0':'#2f8f6a',N:sd,m:'#a35f4d'};
+  const pal={H:hc,h:hd,S:sk,s:sd,W:'#ffffff',I:'#111111',N:sd,m:'#a35f4d'};
   const SR=girl?['HHHHHHHH','HHHHHHHH','HHHHHHSS','HHHHHSSS','HHHHSSSS','HHHSSSSS','HHSSSSSS','HHSSSSSS']:['HHHHHHHH','HHHHHHHH','HHHHSSSS','HHHSSSSS','HHSSSSSS','SSSSSSSS','SSSSSSSS','SSSSSSSS'];
   MCT[vk]={front:mcTex(girl?['HHHHHHHH','HHHHHHHH','HHSSSSHH','SWISSIWS','SSSNNSSS','SSSSSSSS','SSSmmSSS','SSSSSSSS']:['HHHHHHHH','HHHHHHHH','HSSSSSSH','SWISSIWS','SSSNNSSS','SSSSSSSS','SSmmmmSS','SSSSSSSS'],pal),
    side:mcTex(SR,pal),sideL:mcTex(SR.map(r=>[...r].reverse().join('')),pal),
@@ -288,7 +295,7 @@ function person(o){if(o.g==='bf'||o.g==='bm')return blocky(o);if(o.outfit==='mcr
   else if(bsy){const sm=M('#222222');const t1=A(CY(.015,.015,.5,8),sm,-.1,.75,.02);t1.rotation.z=.4;const t2=A(CY(.015,.015,.5,8),sm,.1,.75,.02);t2.rotation.z=-.4;
    A(BX(.22,.26,.12),'#2a6fb8',0,.68,-.16);A(BX(.05,.05,.01),'#e2e2dc',.08,.72,.21)}
   else{A(new THREE.TorusGeometry(.14,.05,8,16),sp?m('#d62828'):TCm,0,.85,-.05,null,1.3);
-   A(BX(.2,.1,.03),sp?'#b01c22':rc?'#e8b830':'#ebecf3',0,.54,.225);
+   if(sp)A(BX(.2,.1,.03),'#b01c22',0,.54,.225);
    if(!bo)A(CY(.22,.31,.2,14),new THREE.MeshLambertMaterial({color:BC,flatShading:true}),0,.34,0)}}
  else{A(CY(.13,.17,.42,16),o.top,0,.665,0);A(CY(.05,.05,.08,10),o.skin,0,.92,0);
   if(o.coat)A(CY(.17,.235,.64,18),'#ffffff',0,.56,0);
@@ -437,7 +444,7 @@ const face=a=>me.g.rotation.y=a;
 async function recep(t){const now=Date.now();if(now<recBlock)return;if(now-recT>4000)recCnt=0;recT=now;
  if(++recCnt>=22){recCnt=0;recBlock=now+10000;say(man,'그므흐르',3000);return}
  if(!await go(80,336))return;face(Math.PI);me.mode='wave';man.mode='wave';
- say(man,'안녕하세요! 어서 오세요 \u{1F60A}');say(me,'안녕하세요~! \u{1F44B}',2200);await sleep(2700);if(t!==token)return;
+ say(man,'안녕하세요! 어서 오세요 \u{1F60A}');say(me,'안녕하세요~! \u{1F44B}',2200);mission('recep');await sleep(2700);if(t!==token)return;
  me.mode='idle';man.mode='idle';say(man,'뒤쪽 게시판에서 소식도 확인해 보세요!',3000)}
 function panel(t,items){document.getElementById('pt').textContent=t;document.getElementById('pb').innerHTML=items.map(i=>'<li>'+i+'</li>').join('');pn.style.display='flex'}
 const cdh=(h,rows,cls)=>`<div class="cd ${cls||''}"><h4>${h}</h4>${rows}</div>`;
@@ -450,6 +457,46 @@ const TIPS=['바닥을 터치하면 걸어가요','풀·나무를 터치하면 다가가서 얻어요','드
  setInterval(()=>{ti=(ti+1)%TIPS.length;const nx=mkT(ti,'110%'),old=cur;nx.getBoundingClientRect();
   old.style.transform='translateY(-110%)';old.style.opacity='0';nx.style.transform='translateY(0)';cur=nx;tc.textContent=(ti+1)+'/'+TIPS.length;setTimeout(()=>old.remove(),600)},5000);
  document.getElementById('tip').addEventListener('click',()=>panel('\u{1F4A1} 이용 안내',TIPS.map((t,i)=>'<b>'+(i+1)+'.</b> '+t)))}
+// ===== 미션 =====
+const MS={d:[['recep','접수하기'],['news','소식보기'],['sit','의자에 앉기'],['steth','진료받기'],['shot','주사맞기'],['snack','간식먹기'],['cafe','카페대기실'],['read','책읽기']],
+ w:[['xray','엑스레이 찍기'],['iv','수액 맞기'],['rabbit','토끼 먹이주기'],['squirrel','다람쥐 먹이주기'],['hug','동물 안기']],
+ r:[['vacc','예방주사 맞기']]};
+const MN={d:'일일 미션',w:'주간 미션',r:'현실 미션'};
+const dKey=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+const wKey=()=>{const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+let msv={dk:'',wk:'',d:[],w:[]};
+try{const x=JSON.parse(localStorage.getItem('dkms')||'null');if(x)msv=Object.assign(msv,x)}catch(e){}
+function msRoll(){let ch=false;if(msv.dk!==dKey()){msv.dk=dKey();msv.d=[];ch=true}if(msv.wk!==wKey()){msv.wk=wKey();msv.w=[];ch=true}if(ch)msSave()}
+function msSave(){try{localStorage.setItem('dkms',JSON.stringify(msv))}catch(e){}}
+function msUpd(){msRoll();document.getElementById('mc').textContent=msv.d.length+'/'+MS.d.length;if(pn.style.display==='flex'&&document.getElementById('pt').textContent==='\u{1F3AF} 미션')openMs()}
+function mission(id){msRoll();for(const c of ['d','w'])if(MS[c].some(m=>m[0]===id)&&!msv[c].includes(id)){msv[c].push(id);msSave();msUpd()}}
+function openMs(){msRoll();const out=[];
+ for(const c of ['d','w','r']){const L=MS[c],n=c==='r'?0:msv[c].length,all=c!=='r'&&n===L.length;
+  out.push('<div class="mh"><input type="checkbox" '+(all?'checked ':'')+'tabindex="-1"> '+MN[c]+'<i>'+(c==='r'?'목록만':n+'/'+L.length)+'</i></div>');
+  L.forEach(m=>out.push('<label class="mi"><input type="checkbox" '+(c!=='r'&&msv[c].includes(m[0])?'checked ':'')+'tabindex="-1"> '+m[1]+'</label>'))}
+ panel('\u{1F3AF} 미션',out)}
+document.getElementById('msn').addEventListener('click',openMs);
+msUpd();setInterval(msUpd,60000);
+// ===== 선생님 이름표 (숨겨진 설정) =====
+const STAFF=[['doc','의사선생님',()=>doc],['man','접수선생님',()=>man],['nu1','주사선생님민트',()=>nu1],['nu2','주사선생님핑크',()=>nu2],['rad','방사선선생님',()=>rad]];
+let stf={};try{stf=JSON.parse(localStorage.getItem('dkstaff')||'{}')||{}}catch(e){}
+const stTag={};
+function stSave(){try{localStorage.setItem('dkstaff',JSON.stringify(stf))}catch(e){}}
+function stCfg(k){const d=STAFF.find(x=>x[0]===k);return stf[k]||(stf[k]={on:false,name:d[1]})}
+function stApply(k){const d=STAFF.find(x=>x[0]===k),c=stCfg(k);
+ if(stTag[k]){stTag[k].e.remove();const i=bs.indexOf(stTag[k]);if(i>=0)bs.splice(i,1);stTag[k]=null}
+ if(c.on){const t=mkTag(d[2](),c.name||d[1],false);const av=t.e.querySelector('.av');if(av)av.textContent='선';stTag[k]=t}}
+STAFF.forEach(x=>stApply(x[0]));
+let pin='';const setBody=(t,h)=>{document.getElementById('pt').textContent=t;document.getElementById('pb').innerHTML=h;pn.style.display='flex'};
+function pinRender(sh){setBody('\u{1F512} 비밀번호','<li><div class="pinbox'+(sh?' sh':'')+'">'+[0,1,2,3,4,5].map(i=>'<span>'+(i<pin.length?'★':'')+'</span>').join('')+'</div></li><li><div class="pad">'+[1,2,3,4,5,6,7,8,9,'\u{232B}',0,''].map(k=>k===''?'<span></span>':'<button onclick="pinKey(\''+k+'\')">'+k+'</button>').join('')+'</div></li>')}
+function pinKey(k){if(k==='\u{232B}'){pin=pin.slice(0,-1);pinRender();return}if(pin.length>=6)return;pin+=k;pinRender();
+ if(pin.length===6){const ok=pin==='090909';setTimeout(()=>{if(ok){pin='';openStaff()}else{pin='';pinRender(true)}},180)}}
+function openPin(){pin='';pinRender()}
+function openStaff(){setBody('\u{1F9D1}\u{200D}\u{2695}\u{FE0F} 선생님 이름표','<li>이름표를 켜고 끌 수 있고, 글자도 바꿀 수 있어요.</li>'+STAFF.map(d=>{const c=stCfg(d[0]);return '<li><button class="chip stf" onclick="stEdit(\''+d[0]+'\')"><span>'+d[1]+'</span><i>'+(c.on?'켜짐 · '+c.name.replace(/</g,'&lt;'):'꺼짐')+'</i></button></li>'}).join(''))}
+function stEdit(k){const d=STAFF.find(x=>x[0]===k),c=stCfg(k);
+ setBody(d[1],'<li><button class="chip'+(c.on?' on':'')+'" onclick="stToggle(\''+k+'\')">이름표 '+(c.on?'켜짐 (눌러서 끄기)':'꺼짐 (눌러서 켜기)')+'</button></li><li>이름표에 쓸 글자</li><li><input id="sti" maxlength="24" value="'+c.name.replace(/"/g,'&quot;')+'" placeholder="이름표 글자 (최대 24글자)"></li><li><button class="chip on" onclick="stSaveName(\''+k+'\')">저장</button><button class="chip" onclick="openStaff()">← 목록</button></li>')}
+function stToggle(k){const c=stCfg(k),i=document.getElementById('sti');if(i&&i.value.trim())c.name=i.value.trim().slice(0,24);c.on=!c.on;stSave();stApply(k);stEdit(k)}
+function stSaveName(k){const c=stCfg(k),v=document.getElementById('sti').value.trim().slice(0,24);if(v)c.name=v;stSave();stApply(k);openStaff()}
 const NEWS=[
  cdh('\u{1F558} 진료 시간',rw('월 · 화 · 금','오전 9:00 ~ 오후 6:00<br>(점심 오후 1:00 ~ 2:00)')+rw('수요일','오후 2:00 ~ 오후 6:00')+rw('목요일','휴진')+rw('토요일','오전 8:00 ~ 12:00')+rw('일요일 · 공휴일','휴진')),
  cdh('\u{1F6AB} 휴진 시간',rw('점심','오후 1:00 ~ 오후 2:00')+rw('수요일','오전 휴진')+rw('목요일','휴진')+'<p class="nt">공휴일 및 목요일, 일요일은 휴진입니다.</p>'),
@@ -458,34 +505,35 @@ const NEWS=[
  cdh('\u{1F331} 성장·성조숙증 클리닉','<p>예약제로만 운영합니다.</p><p class="tel">전화 예약 070-4291-7572</p>','wn'),
  cdh('\u{1F489} 문의와 주사 일정','<p>클리닉 관련 문의는 전화로, 기타 궁금한 사항과 주사 스케줄 조정은 진료 시 문의해 주세요.</p>')
 ];
-async function news1(t){if(!await go(94,336))return;face(Math.PI);panel('\u{1F4CB} 달 소아청소년과 소식',NEWS)}
-async function news2(t){if(!await go(94,158))return;face(0);panel('\u{1F489} 예방접종 안내',['접종 전 아이 컨디션을 확인해요 (예시)','접종 후 20~30분 대기해요 (예시)','※ 실제 안내 내용으로 교체하세요'])}
-async function sit(i,t){if(!await go(264,[120,184,248][i]))return;face(0);me.mode='sit';me.g.position.y=.07;say(me,'폭신폭신~ \u{1F60C}',2500)}
+async function news1(t){if(!await go(94,336))return;face(Math.PI);panel('\u{1F4CB} 달 소아청소년과 소식',NEWS);mission('news');
+ const sec=document.querySelector('#pb .sec');if(sec){let c=0,lt=0;sec.addEventListener('click',()=>{const n=Date.now();c=(n-lt<1500)?c+1:1;lt=n;if(c>=3){c=0;openPin()}})}}
+async function news2(t){if(!await go(94,158))return;face(0);mission('news');panel('\u{1F489} 예방접종 안내',['접종 전 아이 컨디션을 확인해요 (예시)','접종 후 20~30분 대기해요 (예시)','※ 실제 안내 내용으로 교체하세요'])}
+async function sit(i,t){if(!await go(264,[120,184,248][i]))return;face(0);me.mode='sit';me.g.position.y=.07;say(me,'폭신폭신~ \u{1F60C}',2500);mission('sit')}
 function sitNear(t){const [,y]=PX(me.g.position);let k=0,d=1e9;[120,184,248].forEach((c,i)=>{const e=Math.abs(c-y);if(e<d){d=e;k=i}});sit(k,t)}
 async function steth(t){if(!await go(425,70))return;face(Math.PI/2);doc.g.rotation.y=-Math.PI/2;doc.mode='steth';say(doc,'어디 보자~ 숨을 크게 들이쉬어 볼까요? \u{1FA7A}',3000);say(me,'후~ 두근두근',2800);
- await sleep(3300);if(t!==token)return;say(doc,'아주 건강해요! \u{1F44D}',2500);await sleep(2600);if(t!==token)return;doc.mode='idle';doc.g.rotation.y=0}
+ await sleep(3300);if(t!==token)return;say(doc,'아주 건강해요! \u{1F44D}',2500);mission('steth');await sleep(2600);if(t!==token)return;doc.mode='idle';doc.g.rotation.y=0}
 let band=null;
-async function shot(t){if(!await go(94,38))return;face(0);say(nu1,'자, 팔을 걷어볼까요? \u{1F489}',1800);await sleep(2000);if(t!==token)return;me.mode='shot';say(me,'으앗... 따끔! \u{1F623}',2200);await sleep(2300);if(t!==token)return;
+async function shot(t){if(!await go(94,38))return;face(0);say(nu1,'자, 팔을 걷어볼까요? \u{1F489}',1800);await sleep(2000);if(t!==token)return;me.mode='shot';say(me,'으앗... 따끔! \u{1F623}',2200);mission('shot');await sleep(2300);if(t!==token)return;
  if(!band){band=new THREE.Mesh(new THREE.BoxGeometry(.09,.12,.09),M('#fff'));band.position.set(0,-.18,0);me.armR.add(band)}
  say(nu2,'주사 끝! 정말 용감했어요 \u{2B50}',2800);await sleep(2800);if(t!==token)return;me.mode='idle'}
 function flash(){const f=document.getElementById('fl');f.style.opacity=.85;setTimeout(()=>f.style.opacity=0,120)}
 async function xray(t){if(!await go(450,255))return;face(Math.PI/2);me.mode='xr';say(rad,'가슴을 판에 대고 숨을 크게 들이쉬세요~ \u{1FAC1}',3000);await sleep(3200);if(t!==token)return;
- say(rad,'참아요~ 하나, 둘...',1600);await sleep(1700);if(t!==token)return;lampM.color.set('#ff2a2a');flash();say(rad,'찰칵! \u{1F4F8}',1500);await sleep(1500);lampM.color.set('#5a2a2a');if(t!==token)return;me.mode='idle';say(rad,'끝났어요! 아주 잘했어요 \u{1F44D}',2800)}
+ say(rad,'참아요~ 하나, 둘...',1600);await sleep(1700);if(t!==token)return;lampM.color.set('#ff2a2a');flash();mission('xray');say(rad,'찰칵! \u{1F4F8}',1500);await sleep(1500);lampM.color.set('#5a2a2a');if(t!==token)return;me.mode='idle';say(rad,'끝났어요! 아주 잘했어요 \u{1F44D}',2800)}
 async function ledge(t){if(!await go(240,56))return;face(0);me.g.position.copy(P(240,30));me.mode='sit';me.sitY=-.06;
- say(me,'책을 펼쳐볼까~ \u{1F4D6}',2200);await sleep(2300);if(t!==token)return;me.mode='read';
+ say(me,'책을 펼쳐볼까~ \u{1F4D6}',2200);await sleep(2300);if(t!==token)return;me.mode='read';mission('read');
  for(const s of ['옛날 옛적, 하늘에 작은 달님이 살았어요 \u{1F319}','달님은 아픈 친구들을 따뜻하게 안아 주었어요','그래서 아이들은 금방 씩씩해졌답니다 \u{2B50}','재미있다! 또 읽고 싶어요 \u{1F4DA}']){
   say(me,s,3000);await sleep(3300);if(t!==token)return}
  me.mode='sit'}
 async function iv(i,t){const sy=[-118,-26][i],cy=[-150,-56][i];if(!await go(262,sy))return;face(Math.PI);
  say(me,'침대에 누워볼까~ \u{1F6CF}\u{FE0F}',1800);await sleep(1900);if(t!==token)return;
- const c=P(285,cy);me.g.position.set(c.x-.68,0,c.z);me.g.rotation.y=-Math.PI/2;me.mode='lie';
+ const c=P(285,cy);me.g.position.set(c.x-.68,0,c.z);me.g.rotation.y=-Math.PI/2;me.mode='lie';mission('iv');
  say(me,'수액이 똑똑 들어가요 \u{1F4A7}',2600);await sleep(3000);if(t!==token)return;
  say(me,'편안하다~ \u{1F60C}',2200);await sleep(2600);if(t!==token)return;
  me.mode='idle';me.g.position.copy(P(262,sy));face(Math.PI);say(me,'수액 끝! 다 나았어요 \u{1F31F}',2500)}
 function ivNear(t){const y=PX(me.g.position)[1];iv(y<-94?0:1,t)}
-async function cafe(i,t){if(!await go(24,[-136,-51][i]))return;face(Math.PI/2);me.mode='sit';me.g.position.y=.07;say(me,'아늑하다~ \u{2615}',2500)}
+async function cafe(i,t){if(!await go(24,[-136,-51][i]))return;face(Math.PI/2);me.mode='sit';me.g.position.y=.07;say(me,'아늑하다~ \u{2615}',2500);mission('cafe')}
 function cafeNear(t){const y=PX(me.g.position)[1];cafe(Math.abs(y+136)<Math.abs(y+51)?0:1,t)}
-async function snackAct(t){if(!await go(208,240))return;face(-Math.PI/2);say(me,'우와, 간식이다! \u{1F36A}',2200);await sleep(1300);if(t!==token)return;me.mode='eat';await sleep(2200);if(t!==token)return;say(me,'냠냠~ 맛있다 \u{1F60B}',2200);await sleep(1000);if(t!==token)return;me.mode='idle'}
+async function snackAct(t){if(!await go(208,240))return;face(-Math.PI/2);say(me,'우와, 간식이다! \u{1F36A}',2200);await sleep(1300);if(t!==token)return;me.mode='eat';mission('snack');await sleep(2200);if(t!==token)return;say(me,'냠냠~ 맛있다 \u{1F60B}',2200);await sleep(1000);if(t!==token)return;me.mode='idle'}
 // 입력
 const ray=new THREE.Raycaster(),pl=new THREE.Plane(new THREE.Vector3(0,1,0),0);
 const clicks=[];function mk(objs,fn){objs.forEach(o=>{const l=o.isMesh?[o]:[];o.traverse(c=>{if(c.isMesh)l.push(c)});l.forEach(m=>{m.userData.fn=fn;clicks.push(m)})})}
@@ -619,7 +667,7 @@ const ANIM={tick(dt){
   a.calm=Math.max(0,a.calm-dt);const want=(a.type==='rabbit'&&holding==='grass')||(a.type==='squirrel'&&holding==='acorn');
   let vx=0,vz=0,sp=0;
   if(a.eat>0){a.eat-=dt;a.g.position.y=Math.abs(Math.sin(T*14))*.03;a.corner=0}
-  else if(want&&d<5.5){if(d>.78){vx=dx/d;vz=dz/d;sp=2.4}else{holding=null;attachHeld();a.eat=2.2;pickT=1.5;say(a,'냠냠 \u{1F60B}',2000);say(me,a.type==='rabbit'?'토끼야, 풀 먹어~ \u{1F33F}':'다람쥐야, 도토리 먹어~ \u{1F330}',2200)}}
+  else if(want&&d<5.5){if(d>.78){vx=dx/d;vz=dz/d;sp=2.4}else{holding=null;attachHeld();a.eat=2.2;pickT=1.5;mission(a.type==='rabbit'?'rabbit':'squirrel');say(a,'냠냠 \u{1F60B}',2000);say(me,a.type==='rabbit'?'토끼야, 풀 먹어~ \u{1F33F}':'다람쥐야, 도토리 먹어~ \u{1F330}',2200)}}
   else if(d<FLEE&&a.calm<=0&&!hugT){ // 도망: 조금만 가까워져도 바로, 쉬지 않고 135° / 225° 번갈아 (막히면 다른 각도)
    if(a.hopT<=0){const bx=dx/d,bz=dz/d,cand=a.alt%2===0?[135,225,180,90,270,55,305]:[225,135,180,270,90,305,55];a.alt++;let ok2=false;
     for(const dg of cand){const ang=dg*Math.PI/180,c=Math.cos(ang),sn=Math.sin(ang),hx=bx*c-bz*sn,hz=bx*sn+bz*c;
@@ -636,7 +684,7 @@ const ANIM={tick(dt){
    else if(free(a.x,nz)&&Math.abs(vz)>.2){a.z=nz;a.stuck=false;moved=true}
    else{a.stuck=true;a.hopT=0}}
   // 도망쳐도 너무 가까워지면(막다른 곳 등) 잠깐 뒤 안기
-  if(d<.58&&!hugT&&a.eat<=0&&a.calm<=0&&!want){a.corner+=dt;if(a.corner>=.35){a.corner=0;a.hug=true;hugT=3.5;a.stuck=false;a.hopT=0;say(me,'꼭 안았어요 \u{1F495}',2500);continue}}
+  if(d<.58&&!hugT&&a.eat<=0&&a.calm<=0&&!want){a.corner+=dt;if(a.corner>=.35){a.corner=0;a.hug=true;hugT=3.5;a.stuck=false;a.hopT=0;mission('hug');say(me,'꼭 안았어요 \u{1F495}',2500);continue}}
   else if(d>=.58)a.corner=0;
   a.g.position.x=a.x;a.g.position.z=a.z;
   if(moved){a.g.position.y=Math.abs(Math.sin(T*18))*(a.type==='chick'?.07:.12);const ty=Math.atan2(vx,vz);let da=ty-a.g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));a.g.rotation.y+=da*Math.min(1,dt*14)}
@@ -648,13 +696,13 @@ const MP=(()=>{
  const url=q.get('ws')||window.WS_URL||((location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws');
  const VER='v3';
  const R=new Map();let ws=null,myId=null,tries=0,opened=false,lastSent='',acc=0;
- const stat=document.createElement('div');stat.id='mps';stat.textContent='\u{26AA} 오프라인 · '+VER;document.body.appendChild(stat);
+ const stat=document.createElement('div');stat.id='mps';stat.title=VER;stat.textContent='\u{26AA} 오프라인';document.getElementById('trow').appendChild(stat);
  const rd=v=>Math.round(v*1000)/1000;
  const info=()=>({x:rd(me.g.position.x),z:rd(me.g.position.z),ry:rd(me.g.rotation.y),m:me.mode,sy:me.sitY??.07,n:myName,hd:holding||'',c:{g:cz.g,h:cz.h,o:cz.o}});
  let lastAn=-1e9;
  const mkOpts=c=>({kind:'kid',g:c.g,hat:c.h,outfit:c.o,skin:'#fbd3bd',hair:'#2a2420'});
  const book=g=>{const b=new THREE.Mesh(new THREE.BoxGeometry(.3,.2,.04),M('#6aa5e8'));b.position.set(0,.68,.3);b.rotation.x=.9;b.visible=false;g.add(b);return b};
- function stat2(){stat.textContent='\u{1F7E2} '+(R.size+1)+'명 접속 중 · '+VER}
+ function stat2(){stat.textContent='\u{1F7E2} '+(R.size+1)+'명 · '+VER}
  function apply(p,d){if(d.n&&p.tag&&d.n!==p.nm){p.nm=d.n;setName(p.tag,d.n)}p.tx=d.x;p.tz=d.z;p.try=d.ry;p.mode=d.m;p.sy=d.sy;
   const cs=JSON.stringify(d.c);
   if(cs!==p.cs){p.cs=cs;const g0=p.g,pos=g0.position.clone(),ry=g0.rotation.y;S.remove(g0);Object.assign(p,person(mkOpts(d.c)));p.mode=d.m;p.g.rotation.order='YXZ';p.g.position.copy(pos);p.g.rotation.y=ry;p.book=book(p.g)}}
@@ -669,12 +717,12 @@ const MP=(()=>{
    if(m.t==='hello'){myId=m.id;m.players.forEach(add)}
    else if(m.t==='u'&&m.id!==myId)add(m)
    else if(m.t==='an'){lastAn=performance.now();m.a.forEach((d,i)=>{const a=AN[i];if(!a)return;if(a.nx===undefined){a.x=d[0];a.z=d[1]}a.nx=d[0];a.nz=d[1];a.nmv=d[2];a.hugBy=d[3]})}
-   else if(m.t==='eat'){const a=AN[m.a];if(a){say(a,'냠냠 \u{1F60B}',2000);if(m.p===myId){holding=null;attachHeld();pickT=1.5;say(me,a.type==='rabbit'?'토끼야, 풀 먹어~ \u{1F33F}':'다람쥐야, 도토리 먹어~ \u{1F330}',2200)}}}
-   else if(m.t==='hug'){const a=AN[m.a];if(a){a.hugBy=m.p;if(m.p===myId){hugT=3.5;say(me,'꼭 안았어요 \u{1F495}',2500)}}}
+   else if(m.t==='eat'){const a=AN[m.a];if(a){say(a,'냠냠 \u{1F60B}',2000);if(m.p===myId){holding=null;attachHeld();pickT=1.5;mission(a.type==='rabbit'?'rabbit':'squirrel');say(me,a.type==='rabbit'?'토끼야, 풀 먹어~ \u{1F33F}':'다람쥐야, 도토리 먹어~ \u{1F330}',2200)}}}
+   else if(m.t==='hug'){const a=AN[m.a];if(a){a.hugBy=m.p;if(m.p===myId){hugT=3.5;mission('hug');say(me,'꼭 안았어요 \u{1F495}',2500)}}}
    else if(m.t==='rel'){const a=AN[m.a];if(a){a.hugBy=0;a.x=a.nx=m.x;a.z=a.nz=m.z;if(m.p===myId){hugT=0;if(me.mode==='hug')me.mode='idle'}}}
    else if(m.t==='s'){const p=R.get(m.id);if(p)say(p,m.s,m.ms)}
    else if(m.t==='bye')rem(m.id)};
-  ws.onclose=()=>{[...R.keys()].forEach(rem);stat.textContent='\u{26AA} 오프라인 · '+VER;retry()};
+  ws.onclose=()=>{[...R.keys()].forEach(rem);stat.textContent='\u{26AA} 오프라인';retry()};
   ws.onerror=()=>{}}
  function retry(){tries++;if(!opened&&tries>3)return;setTimeout(connect,Math.min(30000,1500*tries))}
  window.MPsay=(txt,ms)=>{if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'s',s:txt,ms}))};
