@@ -136,27 +136,32 @@ function webTex(){const c=document.createElement('canvas');c.width=c.height=256;
  for(let j=0;j<6;j++){const y=j*48+10;for(let i=0;i<8;i++){x.beginPath();x.moveTo(i*32,y);x.quadraticCurveTo(i*32+16,y+14,i*32+32,y);x.stroke()}}
  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
 let WEBT=null;const webMat=()=>new THREE.MeshLambertMaterial({map:WEBT||(WEBT=webTex())});
-// 마인크래프트 스타일 (스티브) 블록 아바타
+// 블록 아바타 (블록 여자 / 블록 남자)
 function mcTex(rows,pal){const c=document.createElement('canvas');c.width=c.height=8;const x=c.getContext('2d');
  rows.forEach((r,y)=>[...r].forEach((k,i)=>{x.fillStyle=pal[k];x.fillRect(i,y,1,1)}));
  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;return new THREE.MeshLambertMaterial({map:t})}
-let MCT=null;
+const MCT={},MCC={mc1:'#8e5bd1',mc2:'#f08a2e',mc3:'#ec6aa8'};
 function blocky(o){
- const g=new THREE.Group(),P=Math.PI;
- if(!MCT){const pal={H:'#4a2f1a',h:'#3b2514',S:'#c69470',s:'#b88460',W:'#ffffff',I:'#4b3fa8',N:'#a8704f',B:'#7a4630',b:'#9a6045'};
-  MCT={front:mcTex(['HHHHHHHH','HHHHHHHH','HSSSSSSH','SWISSIWS','SSSNNSSS','SSBBBBSS','SSBSSBSS','SSSSSSSS'],pal),
+ const g=new THREE.Group(),P=Math.PI,girl=o.g==='bf';
+ const vk=girl?'bf':'bm';
+ if(!MCT[vk]){const hc=girl?'#8a2f4f':'#d8b25a',hd=girl?'#74243f':'#c29a45',sk=girl?'#e8b794':'#c9936d',sd=girl?'#d6a281':'#b8825c';
+  const pal={H:hc,h:hd,S:sk,s:sd,W:'#ffffff',I:girl?'#7a5ab0':'#2f8f6a',N:sd,m:'#a35f4d'};
+  MCT[vk]={front:mcTex(girl?['HHHHHHHH','HHHHHHHH','HHSSSSHH','SWISSIWS','SSSNNSSS','SSSSSSSS','SSSmmSSS','SSSSSSSS']:['HHHHHHHH','HHHHHHHH','HSSSSSSH','SWISSIWS','SSSNNSSS','SSSSSSSS','SSmmmmSS','SSSSSSSS'],pal),
    side:mcTex(['HHHHHHHH','HHHHHHHH','HHHHSSSS','HHHSSSSS','HHSSSSSS','SSSSSSSS','SSSSSSSS','SSSSSSSS'],pal),
    top:mcTex(['HHHHHHHH','HhHHHhHH','HHHhHHHH','HHHHHHhH','hHHHHHHH','HHhHHHHH','HHHHHhHH','HHHHHHHH'],pal),
    back:mcTex(['HHHHHHHH','HHhHHHHH','HHHHHhHH','HHHHHHHH','HhHHHHHH','HHHHHHhH','HHHHHHHH','HHhHHHHH'],pal),
-   bottom:new THREE.MeshLambertMaterial({color:'#b88460'})}}
+   bottom:new THREE.MeshLambertMaterial({color:sk}),hair:hc,skin:sk}}
+ const T=MCT[vk];
  const bx=(w,h,d,m,x,y,z,p)=>{const k=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);k.position.set(x,y,z);(p||g).add(k);return k};
  const L=c=>new THREE.MeshLambertMaterial({color:c});
- const skin='#c69470',shirt='#1fb0b0',jean='#3b4aa8';
- bx(.4,.4,.4,[MCT.side,MCT.side,MCT.top,MCT.bottom,MCT.front,MCT.back],0,1.4,0);
+ const shirt=MCC[o.outfit]||MCC.mc1,dark=new THREE.Color(shirt).multiplyScalar(.78).getStyle(),jean='#4b5266';
+ bx(.4,.4,.4,[T.side,T.side,T.top,T.bottom,T.front,T.back],0,1.4,0);
+ if(girl)bx(.42,.5,.1,L(T.hair),0,1.15,-.25);
  bx(.4,.6,.2,L(shirt),0,.9,0);
- bx(.405,.06,.205,L('#178f8f'),0,.63,0);
- const arm=s=>{const a=new THREE.Group();a.position.set(s*.3,1.2,0);bx(.2,.6,.2,L(skin),0,-.3,0,a);bx(.215,.2,.215,L(shirt),0,-.1,0,a);g.add(a);return a};
- const leg=s=>{const a=new THREE.Group();a.position.set(s*.1,.6,0);bx(.2,.6,.2,L(jean),0,-.3,0,a);bx(.215,.12,.215,L('#6f6f78'),0,-.54,0,a);g.add(a);return a};
+ bx(.405,.06,.205,L(dark),0,.63,0);
+ const aw=girl?.15:.2,ax=girl?.275:.3;
+ const arm=s=>{const a=new THREE.Group();a.position.set(s*ax,1.2,0);bx(aw,.6,.2,L(T.skin),0,-.3,0,a);bx(aw+.015,.2,.215,L(shirt),0,-.1,0,a);g.add(a);return a};
+ const leg=s=>{const a=new THREE.Group();a.position.set(s*.1,.6,0);bx(.2,.6,.2,L(jean),0,-.3,0,a);bx(.215,.12,.215,L('#e6e6ee'),0,-.54,0,a);g.add(a);return a};
  // 모자
  const hy=1.4,SPH=(r,sx=1,sy=1,sz=1)=>{const q=new THREE.SphereGeometry(r,14,10);q.scale(sx,sy,sz);return q},add=(geo,c,x,y,z,rz)=>{const k=new THREE.Mesh(geo,L(c));k.position.set(x,y,z);if(rz)k.rotation.z=rz;g.add(k);return k};
  if(o.hat==='bunny'){[-1,1].forEach(s=>{add(SPH(.07,.9,4.2,.6),'#fdfdfd',s*.1,hy+.5,0,-s*.12);add(SPH(.05,.6,3.6,.35),'#ffb6c8',s*.1,hy+.49,.03,-s*.12)})}
@@ -188,16 +193,15 @@ function villager(o){
   A(SP(.075,1,.7,.3),'#ff9fa8',s*.215,hy-.1,.27)});
  A(SP(.03,1,.9,.8),girl?'#f7a58f':'#e8805f',0,hy-.105,.352);
  const mo=A(new THREE.TorusGeometry(.07,.011,6,18,P2),'#7a3a30',0,hy-.115,.335);mo.rotation.z=P2;
- // ---- 머리카락
+ // ---- 머리카락 (지수=기본 여자 아바타 머리, 민호=기본 남자 아바타 머리)
  const cx=0,cy=hy+(girl?.02:.03),cz=girl?-.03:-.04;
  if(girl){
-  const c1=new THREE.Mesh(cap(.4,0,2*P2,0,1.2,1.03,1,1.03),hm);c1.position.set(cx,cy,cz);g.add(c1);
-  const c2=new THREE.Mesh(cap(.412,P2/2+.78,2*P2-1.56,0,2.15,1.03,1,1.03),hm);c2.position.set(cx,cy,cz);g.add(c2);
-  const bg=new THREE.Mesh(new THREE.CylinderGeometry(.385,.39,.125,30,1,true,-.98,1.96),hm);bg.position.set(0,hy+.145,-.01);g.add(bg);
+  const a1=new THREE.Mesh(new THREE.SphereGeometry(.403,36,20,0,P2*2,0,1.2),hm);a1.position.set(0,hy+.03,-.05);g.add(a1);
+  const a2=new THREE.Mesh(new THREE.SphereGeometry(.397,36,20,P2/2+.85,P2*2-1.7,0,2.6),hm);a2.position.set(0,hy+.03,-.05);g.add(a2);
+  [-1,1].forEach(sd=>{const big=sd<0;A(SP(.17*(big?1.35:1),1,.55*(big?.8:1),.55*(big?.9:1)),hm,big?-.16:(sd*.1+.08),hy+.2,.25+(big?.01:0),null,.3,-sd*(big?.3:.5))});
  }else{
-  const c1=new THREE.Mesh(cap(.4,0,2*P2,0,1.15,1.03,1,1.03),hm);c1.position.set(cx,cy,cz);g.add(c1);
-  const c2=new THREE.Mesh(cap(.405,P2/2+.85,2*P2-1.7,0,1.85,1.03,1,1.03),hm);c2.position.set(cx,cy,cz);g.add(c2);
-  const bg=new THREE.Mesh(new THREE.CylinderGeometry(.385,.39,.09,30,1,true,-1.05,2.1),hm);bg.position.set(0,hy+.158,-.01);g.add(bg);
+  const b1=new THREE.Mesh(new THREE.SphereGeometry(.397,20,14,0,P2*2,0,1.75),hm);b1.position.set(0,hy+.03,-.05);g.add(b1);
+  const b2=new THREE.Mesh(new THREE.SphereGeometry(.4,20,14,P2+.12,P2-.24,0,2.1),hm);b2.position.set(0,hy+.03,-.05);g.add(b2);
  }
  // ---- 모자
  if(o.hat==='bunny'){const w='#fdfdfd';A(new THREE.TorusGeometry(.405,.03,6,24,P2),w,0,hy+.03,-.02);
@@ -244,13 +248,13 @@ function villager(o){
   g.add(a);return a};
  g.scale.setScalar(o.s||1);S.add(g);
  return{g,armL:arm(-1),armR:arm(1),legL:leg(-1),legR:leg(1),mode:'idle',h:(o.s||1)*(o.hat==='bunny'?2.3:o.hat==='flower'?2.1:o.hat==='crown'?1.7:1.55)}}
-function person(o){if(o.outfit==='mcraft')return blocky(o);if(o.outfit==='acnl'||o.outfit==='boyStyle')return villager(o);const g=new THREE.Group(),kid=o.kind==='kid',m=M,white='#f4f4f8';
+function person(o){if(o.g==='bf'||o.g==='bm')return blocky(o);if(o.outfit==='mcraft')return blocky(Object.assign({},o,{g:'bm',outfit:'mc1'}));if(o.outfit==='acnl'||o.outfit==='boyStyle')return villager(o);const g=new THREE.Group(),kid=o.kind==='kid',m=M,white='#f4f4f8';
  const A=(geo,c,x,y,z,p,rx,rz)=>{const k=new THREE.Mesh(geo,typeof c==='string'?m(c):c);k.position.set(x,y,z);if(rx)k.rotation.x=rx;if(rz)k.rotation.z=rz;(p||g).add(k);return k};
  const SP=(r,sx=1,sy=1,sz=1)=>{const q=new THREE.SphereGeometry(r,18,14);q.scale(sx,sy,sz);return q},CY=(a,b,h,n=14)=>new THREE.CylinderGeometry(a,b,h,n),BX=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
  const hr=kid?.36:.23,hy=kid?1.02:1.12,hip=kid?.4:.46,ax=kid?.25:.19,ay=kid?.76:.86;
  const sp=o.outfit==='spider',rc=o.outfit==='rain',ac=o.outfit==='acnl',bsy=o.outfit==='boyStyle',bo=bsy||(o.g==='m'&&!ac),TCm=kid?(sp?webMat():m(rc?'#f5c842':ac?'#e63946':bsy?'#fcfbf7':white)):null,HC=sp?m('#8f1519'):m(rc?'#e0b030':ac?'#e63946':bsy?'#5d7a37':'#ecedf4'),BC=sp?'#2b4b9b':rc?'#3d6fb5':bsy?'#6b3e2e':bo?'#52739f':'#6f95c4';
  // 부드러운 앞머리 (지그재그 없음)
- const fringe=k=>[-1,1].forEach(sd=>{const big=sd<0;A(SP(.17*k*(big?1.35:1),1,.55*(big?.8:1),.55*(big?.9:1)),o.hair,(sd*.1+.08)*k+(big?-.03*k:0),(kid?hy+.2:hy+.128),(kid?.25:.16)+(big?.01:0),null,.3,-sd*(big?.3:.5))});
+ const fringe=k=>[-1,1].forEach(sd=>{const big=sd<0;A(SP(.17*k*(big?1.35:1),1,.55*(big?.8:1),.55*(big?.9:1)),o.hair,big?-.16*k:(sd*.1+.08)*k,(kid?hy+.2:hy+.128),(kid?.25:.16)+(big?.01:0),null,.3,-sd*(big?.3:.5))});
  const gHair=(r,cy,cz,sy,sz,th)=>{const hmat=new THREE.MeshLambertMaterial({color:o.hair,side:THREE.DoubleSide});
   const a=new THREE.SphereGeometry(r+.006,36,20,0,Math.PI*2,0,1.2);a.scale(1,sy,sz);A(a,hmat,0,cy,cz);
   const b=new THREE.SphereGeometry(r,36,20,Math.PI/2+.85,Math.PI*2-1.7,0,th);b.scale(1,sy,sz);A(b,hmat,0,cy,cz)};
@@ -299,7 +303,7 @@ function person(o){if(o.outfit==='mcraft')return blocky(o);if(o.outfit==='acnl'|
   g.add(a);return a};
  g.scale.setScalar(o.s||1);S.add(g);
  return{g,armL:arm(-1),armR:arm(1),legL:leg(-1),legR:leg(1),mode:'idle',h:(o.s||1)*(o.hat==='bunny'?2.3:o.hat==='flower'?2.1:o.hat==='crown'?1.7:1.55)}}
-let cz={g:'f',h:'none',o:'basic'};try{const sv=localStorage.getItem('czv1');if(sv)cz=Object.assign(cz,JSON.parse(sv))}catch(e){}
+let cz={g:'f',h:'none',o:'basic'};try{const sv=localStorage.getItem('czv1');if(sv)cz=Object.assign(cz,JSON.parse(sv))}catch(e){}if(cz.o==='mcraft'){cz.g='bm';cz.o='mc1'}
 const czOpts=()=>({kind:'kid',g:cz.g,hat:cz.h,outfit:cz.o,skin:'#fbd3bd',hair:'#2a2420'});
 const me=person(czOpts());
 const man=person({kind:'adult',skin:'#f2c9a5',hair:'#2a1f1a',top:'#5b8def',bot:'#3b3f58',s:1.35});
@@ -380,10 +384,11 @@ const lg=[box(194,3,335,21,.6,'#d6b48c'),box(194,21,335,39,.3,'#e3c9a5')];
  mp.position.set(wx,2.45,z0+.012);mp.renderOrder=2;S.add(mp)}
 me.g.rotation.order='YXZ';me.g.position.copy(P(264,340));const book=new THREE.Mesh(new THREE.BoxGeometry(.3,.2,.04),M('#e76f51'));book.position.set(0,.68,.3);book.rotation.x=.9;book.visible=false;me.g.add(book);
 function rebuildMe(){const old=me.g,pos=old.position.clone(),ry=old.rotation.y,md=me.mode;S.remove(old);me.holdY=undefined;Object.assign(me,person(czOpts()));me.mode=md;me.g.rotation.order='YXZ';me.g.position.copy(pos);me.g.rotation.y=ry;me.g.add(book);attachHeld()}
-const CZ=[['g','성별',[['f','여자'],['m','남자']]],['h','모자',[['none','없음'],['bunny','토끼 머리띠'],['cat','고양이 귀'],['crown','왕관'],['flower','꽃 화관']]],['o','옷',[['basic','기본 후드'],['spider','빨간 거미줄 옷'],['rain','노란 우비'],['acnl','지수 (여자)'],['boyStyle','민호 (남자)'],['mcraft','마인크래프트']]]];
-function czItems(){return CZ.map(([k,l,op])=>'<b>'+l+'</b><br>'+op.map(([v,t])=>`<button class="chip${cz[k]===v?' on':''}" onclick="setCz('${k}','${v}')">${t}</button>`).join(''))}
+const CZ=[['g','모습',[['f','여자'],['m','남자'],['bf','블록 여자 (알렉스)'],['bm','블록 남자 (스티브)']]],['h','모자',[['none','없음'],['bunny','토끼 머리띠'],['cat','고양이 귀'],['crown','왕관'],['flower','꽃 화관']]],['o','옷',[['basic','기본 후드'],['spider','빨간 거미줄 옷'],['rain','노란 우비'],['acnl','지수 (여자)'],['boyStyle','민호 (남자)']]]];
+const CZ_BLK=[['mc1','보라색'],['mc2','주황색'],['mc3','분홍색']];
+function czItems(){const blk=cz.g==='bf'||cz.g==='bm';return CZ.map(([k,l,op])=>k==='o'&&blk?[k,l,CZ_BLK]:[k,l,op]).map(([k,l,op])=>'<b>'+l+'</b><br>'+op.map(([v,t])=>`<button class="chip${cz[k]===v?' on':''}" onclick="setCz('${k}','${v}')">${t}</button>`).join(''))}
 function openCz(){panel('\u{1F3A8} 꾸미기',czItems())}
-function setCz(k,v){cz[k]=v;if(k==='o'){if(v==='acnl')cz.g='f';if(v==='boyStyle')cz.g='m'}if(k==='g'&&((cz.o==='acnl'&&v==='m')||(cz.o==='boyStyle'&&v==='f')))cz.o='basic';rebuildMe();try{localStorage.setItem('czv1',JSON.stringify(cz))}catch(e){}openCz()}me.g.rotation.y=Math.PI;
+function setCz(k,v){cz[k]=v;if(k==='o'){if(v==='acnl')cz.g='f';if(v==='boyStyle')cz.g='m'}if(k==='g'){const blk=v==='bf'||v==='bm';if(blk&&!/^mc[123]$/.test(cz.o))cz.o='mc1';if(!blk&&/^mc/.test(cz.o))cz.o='basic';if((cz.o==='acnl'&&v==='m')||(cz.o==='boyStyle'&&v==='f'))cz.o='basic'}rebuildMe();try{localStorage.setItem('czv1',JSON.stringify(cz))}catch(e){}openCz()}me.g.rotation.y=Math.PI;
 // 말풍선
 const bs=[];
 function say(p,txt,ms=2600,cls=''){if(p===me&&ms>0&&window.MPsay)window.MPsay(txt,ms);const e=document.createElement('div');e.className='b '+cls;e.textContent=txt;B.appendChild(e);const o={e,p};bs.push(o);if(ms)setTimeout(()=>{e.remove();bs.splice(bs.indexOf(o),1)},ms)}
