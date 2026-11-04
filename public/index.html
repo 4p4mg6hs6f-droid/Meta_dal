@@ -136,6 +136,36 @@ function webTex(){const c=document.createElement('canvas');c.width=c.height=256;
  for(let j=0;j<6;j++){const y=j*48+10;for(let i=0;i<8;i++){x.beginPath();x.moveTo(i*32,y);x.quadraticCurveTo(i*32+16,y+14,i*32+32,y);x.stroke()}}
  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
 let WEBT=null;const webMat=()=>new THREE.MeshLambertMaterial({map:WEBT||(WEBT=webTex())});
+// 마인크래프트 스타일 (스티브) 블록 아바타
+function mcTex(rows,pal){const c=document.createElement('canvas');c.width=c.height=8;const x=c.getContext('2d');
+ rows.forEach((r,y)=>[...r].forEach((k,i)=>{x.fillStyle=pal[k];x.fillRect(i,y,1,1)}));
+ const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;return new THREE.MeshLambertMaterial({map:t})}
+let MCT=null;
+function blocky(o){
+ const g=new THREE.Group(),P=Math.PI;
+ if(!MCT){const pal={H:'#4a2f1a',h:'#3b2514',S:'#c69470',s:'#b88460',W:'#ffffff',I:'#4b3fa8',N:'#a8704f',B:'#7a4630',b:'#9a6045'};
+  MCT={front:mcTex(['HHHHHHHH','HHHHHHHH','HSSSSSSH','SWISSIWS','SSSNNSSS','SSBBBBSS','SSBSSBSS','SSSSSSSS'],pal),
+   side:mcTex(['HHHHHHHH','HHHHHHHH','HHHHSSSS','HHHSSSSS','HHSSSSSS','SSSSSSSS','SSSSSSSS','SSSSSSSS'],pal),
+   top:mcTex(['HHHHHHHH','HhHHHhHH','HHHhHHHH','HHHHHHhH','hHHHHHHH','HHhHHHHH','HHHHHhHH','HHHHHHHH'],pal),
+   back:mcTex(['HHHHHHHH','HHhHHHHH','HHHHHhHH','HHHHHHHH','HhHHHHHH','HHHHHHhH','HHHHHHHH','HHhHHHHH'],pal),
+   bottom:new THREE.MeshLambertMaterial({color:'#b88460'})}}
+ const bx=(w,h,d,m,x,y,z,p)=>{const k=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);k.position.set(x,y,z);(p||g).add(k);return k};
+ const L=c=>new THREE.MeshLambertMaterial({color:c});
+ const skin='#c69470',shirt='#1fb0b0',jean='#3b4aa8';
+ bx(.4,.4,.4,[MCT.side,MCT.side,MCT.top,MCT.bottom,MCT.front,MCT.back],0,1.4,0);
+ bx(.4,.6,.2,L(shirt),0,.9,0);
+ bx(.405,.06,.205,L('#178f8f'),0,.63,0);
+ const arm=s=>{const a=new THREE.Group();a.position.set(s*.3,1.2,0);bx(.2,.6,.2,L(skin),0,-.3,0,a);bx(.215,.2,.215,L(shirt),0,-.1,0,a);g.add(a);return a};
+ const leg=s=>{const a=new THREE.Group();a.position.set(s*.1,.6,0);bx(.2,.6,.2,L(jean),0,-.3,0,a);bx(.215,.12,.215,L('#6f6f78'),0,-.54,0,a);g.add(a);return a};
+ // 모자
+ const hy=1.4,SPH=(r,sx=1,sy=1,sz=1)=>{const q=new THREE.SphereGeometry(r,14,10);q.scale(sx,sy,sz);return q},add=(geo,c,x,y,z,rz)=>{const k=new THREE.Mesh(geo,L(c));k.position.set(x,y,z);if(rz)k.rotation.z=rz;g.add(k);return k};
+ if(o.hat==='bunny'){[-1,1].forEach(s=>{add(SPH(.07,.9,4.2,.6),'#fdfdfd',s*.1,hy+.5,0,-s*.12);add(SPH(.05,.6,3.6,.35),'#ffb6c8',s*.1,hy+.49,.03,-s*.12)})}
+ else if(o.hat==='cat'){[-1,1].forEach(s=>{add(new THREE.ConeGeometry(.09,.16,4),'#3a3a3a',s*.14,hy+.26,0,-s*.2);add(new THREE.ConeGeometry(.05,.1,4),'#ff9fb5',s*.14,hy+.25,.02,-s*.2)})}
+ else if(o.hat==='crown'){const gm=new THREE.MeshLambertMaterial({color:'#f2c14e',side:THREE.DoubleSide});const c=new THREE.Mesh(new THREE.CylinderGeometry(.2,.21,.1,4,1,true),gm);c.position.set(0,hy+.24,0);c.rotation.y=P/4;g.add(c);
+  for(let i=0;i<4;i++){const a=i/4*P*2+P/4;add(new THREE.ConeGeometry(.04,.1,4),'#f2c14e',Math.sin(a)*.2,hy+.34,Math.cos(a)*.2)}}
+ else if(o.hat==='flower'){const fc=['#e5303b','#f49a3c','#8a6bd0','#e5303b'];for(let i=0;i<8;i++){const a=i/8*P*2,r=.24;add(SPH(.05,1,.6,1),i%2?'#3f9a55':fc[(i>>1)%4],Math.sin(a)*r,hy+.215,Math.cos(a)*r)}}
+ g.scale.setScalar(.92*(o.s||1));S.add(g);
+ return{g,armL:arm(-1),armR:arm(1),legL:leg(-1),legR:leg(1),mode:'idle',holdY:-.66,h:.92*(o.s||1)*(o.hat==='bunny'?2.3:o.hat==='flower'?2.0:o.hat==='crown'?1.9:1.75)}}
 let PLT=null;
 function plaidMat(){if(!PLT){const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.fillStyle='#6a9a30';x.fillRect(0,0,64,64);
  x.fillStyle='rgba(28,72,22,.6)';for(let i=0;i<64;i+=16){x.fillRect(i,0,8,64);x.fillRect(0,i,64,8)}
@@ -214,7 +244,7 @@ function villager(o){
   g.add(a);return a};
  g.scale.setScalar(o.s||1);S.add(g);
  return{g,armL:arm(-1),armR:arm(1),legL:leg(-1),legR:leg(1),mode:'idle',h:(o.s||1)*(o.hat==='bunny'?2.3:o.hat==='flower'?2.1:o.hat==='crown'?1.7:1.55)}}
-function person(o){if(o.outfit==='acnl'||o.outfit==='boyStyle')return villager(o);const g=new THREE.Group(),kid=o.kind==='kid',m=M,white='#f4f4f8';
+function person(o){if(o.outfit==='mcraft')return blocky(o);if(o.outfit==='acnl'||o.outfit==='boyStyle')return villager(o);const g=new THREE.Group(),kid=o.kind==='kid',m=M,white='#f4f4f8';
  const A=(geo,c,x,y,z,p,rx,rz)=>{const k=new THREE.Mesh(geo,typeof c==='string'?m(c):c);k.position.set(x,y,z);if(rx)k.rotation.x=rx;if(rz)k.rotation.z=rz;(p||g).add(k);return k};
  const SP=(r,sx=1,sy=1,sz=1)=>{const q=new THREE.SphereGeometry(r,18,14);q.scale(sx,sy,sz);return q},CY=(a,b,h,n=14)=>new THREE.CylinderGeometry(a,b,h,n),BX=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
  const hr=kid?.36:.23,hy=kid?1.02:1.12,hip=kid?.4:.46,ax=kid?.25:.19,ay=kid?.76:.86;
@@ -349,8 +379,8 @@ const lg=[box(194,3,335,21,.6,'#d6b48c'),box(194,21,335,39,.3,'#e3c9a5')];
  const mp=new THREE.Mesh(new THREE.PlaneGeometry(3.6,.9),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cn2),transparent:true}));
  mp.position.set(wx,2.45,z0+.012);mp.renderOrder=2;S.add(mp)}
 me.g.rotation.order='YXZ';me.g.position.copy(P(264,340));const book=new THREE.Mesh(new THREE.BoxGeometry(.3,.2,.04),M('#e76f51'));book.position.set(0,.68,.3);book.rotation.x=.9;book.visible=false;me.g.add(book);
-function rebuildMe(){const old=me.g,pos=old.position.clone(),ry=old.rotation.y,md=me.mode;S.remove(old);Object.assign(me,person(czOpts()));me.mode=md;me.g.rotation.order='YXZ';me.g.position.copy(pos);me.g.rotation.y=ry;me.g.add(book);attachHeld()}
-const CZ=[['g','성별',[['f','여자'],['m','남자']]],['h','모자',[['none','없음'],['bunny','토끼 머리띠'],['cat','고양이 귀'],['crown','왕관'],['flower','꽃 화관']]],['o','옷',[['basic','기본 후드'],['spider','빨간 거미줄 옷'],['rain','노란 우비'],['acnl','지수 (여자)'],['boyStyle','민호 (남자)']]]];
+function rebuildMe(){const old=me.g,pos=old.position.clone(),ry=old.rotation.y,md=me.mode;S.remove(old);me.holdY=undefined;Object.assign(me,person(czOpts()));me.mode=md;me.g.rotation.order='YXZ';me.g.position.copy(pos);me.g.rotation.y=ry;me.g.add(book);attachHeld()}
+const CZ=[['g','성별',[['f','여자'],['m','남자']]],['h','모자',[['none','없음'],['bunny','토끼 머리띠'],['cat','고양이 귀'],['crown','왕관'],['flower','꽃 화관']]],['o','옷',[['basic','기본 후드'],['spider','빨간 거미줄 옷'],['rain','노란 우비'],['acnl','지수 (여자)'],['boyStyle','민호 (남자)'],['mcraft','마인크래프트']]]];
 function czItems(){return CZ.map(([k,l,op])=>'<b>'+l+'</b><br>'+op.map(([v,t])=>`<button class="chip${cz[k]===v?' on':''}" onclick="setCz('${k}','${v}')">${t}</button>`).join(''))}
 function openCz(){panel('🎨 꾸미기',czItems())}
 function setCz(k,v){cz[k]=v;if(k==='o'){if(v==='acnl')cz.g='f';if(v==='boyStyle')cz.g='m'}if(k==='g'&&((cz.o==='acnl'&&v==='m')||(cz.o==='boyStyle'&&v==='f')))cz.o='basic';rebuildMe();try{localStorage.setItem('czv1',JSON.stringify(cz))}catch(e){}openCz()}me.g.rotation.y=Math.PI;
@@ -546,7 +576,7 @@ const hgrass=new THREE.Group();for(let i=0;i<5;i++){const b=new THREE.Mesh(new T
 hgrass.position.set(0,-.38,.05);
 const hacorn=new THREE.Group();{const b=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),M('#a0632a'));b.scale.y=1.2;hacorn.add(b);const c=new THREE.Mesh(new THREE.SphereGeometry(.075,8,5,0,Math.PI*2,0,1.2),M('#6b4020'));c.position.y=.05;hacorn.add(c)}
 hacorn.position.set(0,-.42,.05);
-function attachHeld(){me.armR.add(hgrass);me.armR.add(hacorn);hgrass.visible=holding==='grass';hacorn.visible=holding==='acorn'}
+function attachHeld(){me.armR.add(hgrass);me.armR.add(hacorn);hgrass.position.set(0,me.holdY||-.38,.05);hacorn.position.set(0,me.holdY?me.holdY-.04:-.42,.05);hgrass.visible=holding==='grass';hacorn.visible=holding==='acorn'}
 attachHeld();
 function releaseHug(){if(hugT>0){hugT=0;doRelease()}}
 function doRelease(){AN.forEach(a=>{if(a.hug){a.hug=false;a.calm=1.5;a.corner=0;const f=me.g.rotation.y;let nx=me.g.position.x,nz=me.g.position.z;
