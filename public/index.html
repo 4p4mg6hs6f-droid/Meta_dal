@@ -19,7 +19,8 @@ html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;-webkit-
 canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #top{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);pointer-events:none}
 #top b{background:var(--card);padding:6px 12px;border-radius:14px;font-size:15px;display:inline-block}
-#top small{display:block;margin-top:6px;font-size:12px;background:var(--card);padding:4px 10px;border-radius:10px;width:fit-content}
+#top small{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;background:var(--card);padding:4px 10px;border-radius:10px;width:min(290px,100%);box-sizing:border-box;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#tm{position:relative;flex:1;min-width:0;height:18px;overflow:hidden}#tm .t{position:absolute;left:0;right:0;top:0;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .5s ease,opacity .5s ease}#tc{font-style:normal;opacity:.6;flex:none;font-variant-numeric:tabular-nums}
 #bar{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);display:flex;gap:8px;padding:0 12px;overflow-x:auto}
 #bar button{flex:none;border:0;background:var(--btn);color:var(--fg);padding:11px 14px;border-radius:20px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer}
 #bar button:active{background:var(--ac)}
@@ -57,7 +58,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 
 </style></head><body>
 <canvas id="c"></canvas><div id="B"></div><div id="fl" style="position:fixed;inset:0;background:#fff;opacity:0;transition:opacity .5s;pointer-events:none"></div>
-<div id="top"><b>🏥 메타 달소아청소년과</b><small>바닥을 터치하면 걸어가요 · 풀·나무를 터치하면 다가가서 얻어요 · 드래그: 좌우 회전 · 상하 각도</small></div>
+<div id="top"><b>🏥 메타 달소아청소년과</b><small id="tip"><span id="tm"></span><em id="tc"></em></small></div>
 <div id="dp"><i data-k="u">▲</i><i data-k="l">◀</i><i data-k="r">▶</i><i data-k="d">▼</i></div>
 <div id="bar">
 <button onclick="run(recep)">👋 접수하기</button>
@@ -219,7 +220,7 @@ function person(o){if(o.outfit==='acnl'||o.outfit==='boyStyle')return villager(o
  const hr=kid?.36:.23,hy=kid?1.02:1.12,hip=kid?.4:.46,ax=kid?.25:.19,ay=kid?.76:.86;
  const sp=o.outfit==='spider',rc=o.outfit==='rain',ac=o.outfit==='acnl',bsy=o.outfit==='boyStyle',bo=bsy||(o.g==='m'&&!ac),TCm=kid?(sp?webMat():m(rc?'#f5c842':ac?'#e63946':bsy?'#fcfbf7':white)):null,HC=sp?m('#8f1519'):m(rc?'#e0b030':ac?'#e63946':bsy?'#5d7a37':'#ecedf4'),BC=sp?'#2b4b9b':rc?'#3d6fb5':bsy?'#6b3e2e':bo?'#52739f':'#6f95c4';
  // 부드러운 앞머리 (지그재그 없음)
- const fringe=k=>[-1,1].forEach(sd=>{const big=sd<0;A(SP(.17*k*(big?2:1),1,.55*(big?.75:1),.55*(big?.9:1)),o.hair,(sd*.1+.08)*k,(kid?hy+.2:hy+.128)+(big?.02*k:0),(kid?.25:.16)+(big?.01:0),null,.3,-sd*.5)});
+ const fringe=k=>[-1,1].forEach(sd=>{const big=sd<0;A(SP(.17*k*(big?1.35:1),1,.55*(big?.8:1),.55*(big?.9:1)),o.hair,(sd*.1+.08)*k+(big?-.03*k:0),(kid?hy+.2:hy+.128),(kid?.25:.16)+(big?.01:0),null,.3,-sd*(big?.3:.5))});
  const gHair=(r,cy,cz,sy,sz,th)=>{const hmat=new THREE.MeshLambertMaterial({color:o.hair,side:THREE.DoubleSide});
   const a=new THREE.SphereGeometry(r+.006,36,20,0,Math.PI*2,0,1.2);a.scale(1,sy,sz);A(a,hmat,0,cy,cz);
   const b=new THREE.SphereGeometry(r,36,20,Math.PI/2+.85,Math.PI*2-1.7,0,th);b.scale(1,sy,sz);A(b,hmat,0,cy,cz)};
@@ -405,6 +406,14 @@ async function recep(t){const now=Date.now();if(now<recBlock)return;if(now-recT>
 function panel(t,items){document.getElementById('pt').textContent=t;document.getElementById('pb').innerHTML=items.map(i=>'<li>'+i+'</li>').join('');pn.style.display='flex'}
 const cdh=(h,rows,cls)=>`<div class="cd ${cls||''}"><h4>${h}</h4>${rows}</div>`;
 const rw=(a,b)=>`<div class="r"><em>${a}</em><span>${b}</span></div>`;
+// 상단 안내: 5초마다 위로 올라가며 다음 메시지, 누르면 전체 보기
+const TIPS=['바닥을 터치하면 걸어가요','풀·나무를 터치하면 다가가서 얻어요','드래그: 좌우 회전 · 상하 각도'];
+{let ti=0;const tm=document.getElementById('tm'),tc=document.getElementById('tc');
+ const mkT=(i,y)=>{const e=document.createElement('span');e.className='t';e.textContent=TIPS[i];e.style.transform='translateY('+y+')';tm.appendChild(e);return e};
+ let cur=mkT(0,'0');tc.textContent='1/'+TIPS.length;
+ setInterval(()=>{ti=(ti+1)%TIPS.length;const nx=mkT(ti,'110%'),old=cur;nx.getBoundingClientRect();
+  old.style.transform='translateY(-110%)';old.style.opacity='0';nx.style.transform='translateY(0)';cur=nx;tc.textContent=(ti+1)+'/'+TIPS.length;setTimeout(()=>old.remove(),600)},5000);
+ document.getElementById('tip').addEventListener('click',()=>panel('💡 이용 안내',TIPS.map((t,i)=>'<b>'+(i+1)+'.</b> '+t)))}
 const NEWS=[
  cdh('🕘 진료 시간',rw('월 · 화 · 금','오전 9:00 ~ 오후 6:00<br>(점심 오후 1:00 ~ 2:00)')+rw('수요일','오후 2:00 ~ 오후 6:00')+rw('목요일','휴진')+rw('토요일','오전 8:00 ~ 12:00')+rw('일요일 · 공휴일','휴진')),
  cdh('🚫 휴진 시간',rw('점심','오후 1:00 ~ 오후 2:00')+rw('수요일','오전 휴진')+rw('목요일','휴진')+'<p class="nt">공휴일 및 목요일, 일요일은 휴진입니다.</p>'),
