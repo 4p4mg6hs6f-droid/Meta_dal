@@ -1,12 +1,13 @@
 // 메타 달소아청소년과 - 정적 파일 + 멀티플레이(WebSocket) 서버
 const http = require('http'), fs = require('fs'), path = require('path');
 const { WebSocketServer } = require('ws');
+const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
 // public 폴더가 있으면 거기서, 없으면(파일을 폴더 없이 올린 경우) 이 폴더에서 화면 파일을 서빙
 const PUB = path.join(__dirname, 'public');
 const ROOT = fs.existsSync(PUB) ? PUB : __dirname;
-const DENY = new Set(['staff.json', 'server.js', 'package.json', 'package-lock.json', 'readme.txt', 'readme.md']);
+const DENY = new Set(['scores.json', 'staff.json', 'server.js', 'package.json', 'package-lock.json', 'readme.txt', 'readme.md']);
 const MAX_PLAYERS = 50;
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -42,6 +43,56 @@ try {
 } catch {}
 let staffTimer = null;
 function saveStaff() { clearTimeout(staffTimer); staffTimer = setTimeout(() => fs.writeFile(STAFF_FILE, JSON.stringify(staff), () => {}), 300); }
+
+// ---------- 미션 점수 (접속자별 누적, scores.json 에 저장) ----------
+const SCORE_FILE = path.join(__dirname, 'scores.json');
+const MS_D = ['recep', 'news', 'sit', 'steth', 'shot', 'snack', 'cafe', 'read'];
+const MS_W = ['xray', 'iv', 'rabbit', 'squirrel', 'hug'];
+const PTS = { d: 10, w: 15 }, BONUS = { d: 10, w: 20 };
+const kst = () => new Date(Date.now() + 9 * 3600e3);
+const dKey = () => { const d = kst(); return d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate(); };
+const wKey = () => { const d = kst(); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate(); };
+let scores = {};
+try { scores = JSON.parse(fs.readFileSync(SCORE_FILE, 'utf8')) || {}; } catch {}
+let scoreTimer = null;
+function saveScores() { clearTimeout(scoreTimer); scoreTimer = setTimeout(() => fs.writeFile(SCORE_FILE, JSON.stringify(scores), () => {}), 500); }
+const uidOf = cid => crypto.createHash('sha1').update(cid).digest('hex').slice(0, 8);
+function recOf(cid, name) {
+  const r = scores[cid] || (scores[cid] = { n: name || '친구', total: 0, dk: '', wk: '', d: [], w: [], bd: false, bw: false, t: Date.now() });
+  if (r.dk !== dKey()) { r.dk = dKey(); r.d = []; r.bd = false; }
+  if (r.wk !== wKey()) { r.wk = wKey(); r.w = []; r.bw = false; }
+  if (name) r.n = name;
+  return r;
+}
+function award(cid, id, name) {
+  const r = recOf(cid, name);
+  for (const [c, list] of [['d', MS_D], ['w', MS_W]]) {
+    if (!list.includes(id) || r[c].includes(id)) continue;
+    r[c].push(id); r.total += PTS[c]; r.t = Date.now();
+    if (r[c].length === list.length) { const b = c === 'd' ? 'bd' : 'bw'; if (!r[b]) { r[b] = true; r.total += BONUS[c]; } }
+    saveScores();
+  }
+  return r;
+}
+function sendMs(ws) {
+  if (!ws.cid) return;
+  const r = recOf(ws.cid);
+  send(ws, { t: 'ms', d: r.d, w: r.w, total: r.total, bd: r.bd, bw: r.bw, u: uidOf(ws.cid) });
+}
+let lbTimer = null;
+function scheduleLb() { if (lbTimer) return; lbTimer = setTimeout(() => { lbTimer = null; broadcastLb(); }, 600); }
+function broadcastLb() {
+  const top = Object.entries(scores).filter(([, r]) => r.total > 0)
+    .sort((a, b) => b[1].total - a[1].total || a[1].t - b[1].t).slice(0, 10).map(([c, r]) => [uidOf(c), r.n, r.total]);
+  const on = [];
+  for (const c of wss.clients) {
+    const p = c.pid && players.get(c.pid);
+    if (p && p.seen) on.push([p.id, c.cid ? uidOf(c.cid) : '', p.n, c.cid && scores[c.cid] ? scores[c.cid].total : 0]);
+  }
+  on.sort((a, b) => b[3] - a[3]);
+  broadcast({ t: 'lb', top, on });
+}
+setInterval(() => { if (wss.clients.size) broadcastLb(); }, 5000);
 
 // ---------- 멀티플레이 ----------
 const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 2048 });
@@ -81,8 +132,13 @@ wss.on('connection', ws => {
     let m; try { m = JSON.parse(raw.toString()); } catch { return; }
     if (m.t === 'u') {
       Object.assign(me, clean(m)); me.seen = true;
-      if (typeof m.n === 'string') { const nn = m.n.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 24); if (nn) me.n = nn; }
+      if (typeof m.n === 'string') { const nn = m.n.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 24); if (nn) { me.n = nn; if (ws.cid && scores[ws.cid]) scores[ws.cid].n = nn; } }
+      if (!ws.seenOnce) { ws.seenOnce = true; scheduleLb(); }
       broadcast({ t: 'u', id, n: me.n, x: me.x, z: me.z, ry: me.ry, m: me.m, sy: me.sy, c: me.c }, ws);
+    } else if (m.t === 'hi') {
+      if (typeof m.cid === 'string' && /^[A-Za-z0-9]{8,40}$/.test(m.cid)) { ws.cid = m.cid; recOf(m.cid, me.seen ? me.n : undefined); sendMs(ws); scheduleLb(); }
+    } else if (m.t === 'm') {
+      if (ws.cid && typeof m.id === 'string') { award(ws.cid, m.id, me.n); sendMs(ws); scheduleLb(); }
     } else if (m.t === 'staff') {
       if (m.pin !== STAFF_PIN || !(m.k in STAFF_DEF) || typeof m.on !== 'boolean') return;
       const nm = typeof m.name === 'string' ? m.name.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 24) : '';
@@ -96,7 +152,7 @@ wss.on('connection', ws => {
       broadcast({ t: 's', id, s: m.s.slice(0, 60), ms: num(m.ms, 1500, 5000, 2600) }, ws);
     }
   });
-  ws.on('close', () => { for (const a of ANIMALS) if (a.hug === id) releaseAnimal(a); players.delete(id); if (me.seen) broadcast({ t: 'bye', id }, ws); });
+  ws.on('close', () => { for (const a of ANIMALS) if (a.hug === id) releaseAnimal(a); players.delete(id); scheduleLb(); if (me.seen) broadcast({ t: 'bye', id }, ws); });
   ws.on('error', () => {});
 });
 setInterval(() => { for (const c of wss.clients) c.cnt = 0; }, 1000);
