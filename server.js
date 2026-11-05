@@ -31,18 +31,45 @@ const server = http.createServer((req, res) => {
   });
 });
 
-// ---------- 선생님 이름표 (모든 접속자에게 공유, staff.json 에 저장) ----------
+// ---------- 외부 저장소 (Upstash Redis) ----------
+// Render 무료 서버는 재시작/재배포 때 파일이 사라지므로, 환경변수가 있으면 Upstash에 저장합니다.
+// 환경변수(UPSTASH_URL, UPSTASH_TOKEN)가 없으면 예전처럼 파일(staff.json, scores.json)에 저장합니다.
+const UP_URL = (process.env.UPSTASH_URL || process.env.UPSTASH_REDIS_REST_URL || '').replace(/\/+$/, '');
+const UP_TOK = process.env.UPSTASH_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '';
+const KV = !!(UP_URL && UP_TOK);
+const KV_STAFF = 'dalkids:staff', KV_SCORES = 'dalkids:scores';
+async function kvCmd(cmd) {
+  const r = await fetch(UP_URL, {
+    method: 'POST', headers: { Authorization: 'Bearer ' + UP_TOK, 'Content-Type': 'application/json' },
+    body: JSON.stringify(cmd), signal: AbortSignal.timeout(8000)
+  });
+  const j = await r.json();
+  if (!r.ok || j.error) throw new Error(j.error || 'HTTP ' + r.status);
+  return j.result;
+}
+async function kvLoad(key) {                       // 없으면 null, 오류면 throw
+  const v = await kvCmd(['GET', key]);
+  return v ? JSON.parse(v) : null;
+}
+const kvSave = (key, obj) => kvCmd(['SET', key, JSON.stringify(obj)]);
+
+// ---------- 선생님 이름표 (모든 접속자에게 공유) ----------
 const STAFF_FILE = path.join(__dirname, 'staff.json');
 const STAFF_DEF = { doc: '의사선생님', man: '접수선생님', nu1: '주사선생님민트', nu2: '주사선생님핑크', rad: '방사선선생님' };
-const STAFF_PIN = '090909';
+const STAFF_PIN = process.env.STAFF_PIN || '090909';
 const staff = {};
 for (const k in STAFF_DEF) staff[k] = { on: false, name: STAFF_DEF[k] };
-try {
-  const saved = JSON.parse(fs.readFileSync(STAFF_FILE, 'utf8'));
-  for (const k in STAFF_DEF) if (saved[k]) staff[k] = { on: !!saved[k].on, name: String(saved[k].name || STAFF_DEF[k]).slice(0, 24) };
-} catch {}
-let staffTimer = null;
-function saveStaff() { clearTimeout(staffTimer); staffTimer = setTimeout(() => fs.writeFile(STAFF_FILE, JSON.stringify(staff), () => {}), 300); }
+function applyStaff(saved) {
+  for (const k in STAFF_DEF) if (saved && saved[k]) staff[k] = { on: !!saved[k].on, name: String(saved[k].name || STAFF_DEF[k]).slice(0, 24) };
+}
+try { applyStaff(JSON.parse(fs.readFileSync(STAFF_FILE, 'utf8'))); } catch {}
+let staffTimer = null, staffDirty = false;
+function writeStaff() {
+  staffDirty = false;
+  if (KV) return kvSave(KV_STAFF, staff).catch(e => { staffDirty = true; console.error('staff 저장 실패:', e.message); });
+  fs.writeFile(STAFF_FILE, JSON.stringify(staff), () => {}); return Promise.resolve();
+}
+function saveStaff() { staffDirty = true; clearTimeout(staffTimer); staffTimer = setTimeout(writeStaff, 300); }
 
 // ---------- 미션 점수 (접속자별 누적, scores.json 에 저장) ----------
 const SCORE_FILE = path.join(__dirname, 'scores.json');
@@ -54,8 +81,14 @@ const dKey = () => { const d = kst(); return d.getUTCFullYear() + '-' + (d.getUT
 const wKey = () => { const d = kst(); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate(); };
 let scores = {};
 try { scores = JSON.parse(fs.readFileSync(SCORE_FILE, 'utf8')) || {}; } catch {}
-let scoreTimer = null;
-function saveScores() { clearTimeout(scoreTimer); scoreTimer = setTimeout(() => fs.writeFile(SCORE_FILE, JSON.stringify(scores), () => {}), 500); }
+let scoreTimer = null, scoresDirty = false;
+function writeScores() {
+  scoresDirty = false; scoreTimer = null;
+  if (KV) return kvSave(KV_SCORES, scores).catch(e => { scoresDirty = true; console.error('scores 저장 실패:', e.message); });
+  fs.writeFile(SCORE_FILE, JSON.stringify(scores), () => {}); return Promise.resolve();
+}
+// Upstash 사용 시 15초에 한 번만 저장(무료 명령 수 절약), 파일 저장 시 0.5초
+function saveScores() { scoresDirty = true; if (scoreTimer) return; scoreTimer = setTimeout(writeScores, KV ? 15000 : 500); }
 const uidOf = cid => crypto.createHash('sha1').update(cid).digest('hex').slice(0, 8);
 function recOf(cid, name) {
   const r = scores[cid] || (scores[cid] = { n: name || '친구', total: 0, dk: '', wk: '', d: [], w: [], bd: false, bw: false, t: Date.now() });
@@ -257,4 +290,36 @@ setInterval(() => {
   }
 }, 50);
 
-server.listen(PORT, () => console.log('달소아청소년과 서버 실행: http://localhost:' + PORT));
+// ---------- 시작: Upstash에서 불러온 뒤에 접속을 받음 ----------
+async function boot() {
+  if (KV) {
+    for (let i = 1; ; i++) {
+      try {
+        const st = await kvLoad(KV_STAFF); if (st) applyStaff(st);
+        const sc = await kvLoad(KV_SCORES); if (sc) scores = sc;
+        // 처음 연결이면(저장소가 비어 있으면) 지금 값을 한 번 저장해 둠
+        if (!st) await kvSave(KV_STAFF, staff);
+        if (!sc) await kvSave(KV_SCORES, scores);
+        console.log('Upstash에서 불러옴: 점수 기록 ' + Object.keys(scores).length + '명');
+        break;
+      } catch (e) {
+        console.error('Upstash 불러오기 실패 (' + i + '/4):', e.message);
+        // 불러오기에 실패한 채로 시작하면 빈 데이터로 덮어쓸 수 있으므로 시작하지 않음
+        if (i >= 4) { console.error('저장소에 연결할 수 없어 종료합니다.'); process.exit(1); }
+        await new Promise(r => setTimeout(r, 2000 * i));
+      }
+    }
+  } else console.log('UPSTASH_URL/UPSTASH_TOKEN 없음 → 파일에 저장합니다 (Render 무료에서는 재시작 시 사라짐)');
+  server.listen(PORT, () => console.log('달소아청소년과 서버 실행: http://localhost:' + PORT));
+}
+boot();
+
+// Render가 서버를 멈추기 전(SIGTERM)에 아직 저장 안 된 값을 바로 저장
+let closing = false;
+async function shutdown() {
+  if (closing) return; closing = true;
+  try { clearTimeout(scoreTimer); clearTimeout(staffTimer); if (scoresDirty) await writeScores(); if (staffDirty) await writeStaff(); } catch {}
+  process.exit(0);
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
