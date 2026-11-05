@@ -45,6 +45,8 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 #pn header button{border:0;background:var(--ac);color:#fff;padding:6px 12px;border-radius:12px;font-size:13px;cursor:pointer;flex:none}
 #pn .chip{border:1px solid rgba(127,127,127,.4);background:transparent;color:var(--fg);border-radius:14px;padding:6px 11px;margin:4px 6px 2px 0;font-size:13px;cursor:pointer}
 #pn .chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.chip.lock{opacity:.38}
+#toast{display:none;position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 110px);transform:translateX(-50%);background:rgba(30,30,40,.92);color:#fff;padding:10px 16px;border-radius:16px;font-size:14px;z-index:300;max-width:84vw;text-align:center;pointer-events:none}
 #trow{display:flex;align-items:center;gap:4px;flex-wrap:wrap;max-width:calc(100% - 80px)}#mps{background:var(--card);color:var(--fg);padding:5px 7px;border-radius:12px;font-size:11px;pointer-events:auto;cursor:pointer;white-space:nowrap}
 #mm{flex:1;min-width:0}#msn em{font-style:normal;opacity:.6;flex:none;font-variant-numeric:tabular-nums}
 #czb{position:fixed;right:58px;top:calc(env(safe-area-inset-top,0px) + 10px);border:0;background:var(--btn);color:var(--fg);padding:9px 12px;border-radius:18px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
@@ -401,11 +403,15 @@ const lg=[box(194,3,335,21,.6,'#d6b48c'),box(194,21,335,39,.3,'#e3c9a5')];
  mp.position.set(wx,2.45,z0+.012);mp.renderOrder=2;S.add(mp)}
 me.g.rotation.order='YXZ';me.g.position.copy(P(264,340));const book=new THREE.Mesh(new THREE.BoxGeometry(.3,.2,.04),M('#e76f51'));book.position.set(0,.68,.3);book.rotation.x=.9;book.visible=false;me.g.add(book);
 function rebuildMe(){const old=me.g,pos=old.position.clone(),ry=old.rotation.y,md=me.mode;S.remove(old);me.holdY=undefined;Object.assign(me,person(czOpts()));me.mode=md;me.g.rotation.order='YXZ';me.g.position.copy(pos);me.g.rotation.y=ry;me.g.add(book);attachHeld()}
-const CZ=[['g','모습',[['f','여자'],['m','남자'],['bf','블록 여자'],['bm','블록 남자']]],['h','모자',[['none','없음'],['bunny','토끼 머리띠'],['cat','고양이 귀'],['crown','왕관'],['flower','꽃 화관']]],['o','옷',[['basic','기본 후드'],['spider','빨간 거미줄 옷'],['rain','노란 우비'],['acnl','지수 (여자)'],['boyStyle','민호 (남자)']]]];
+const CZ=[['g','모습',[['f','여자'],['m','남자'],['bf','블록 여자'],['bm','블록 남자']]],['h','모자',[['none','없음'],['bunny','토끼 머리띠'],['cat','고양이 귀'],['crown','왕관'],['flower','꽃 화관']]],['o','옷',[['basic','기본 후드'],['spider','빨간 거미줄 옷'],['rain','노란 우비'],['acnl','지수'],['boyStyle','민호']]]];
 const CZ_BLK=[['mc1','보라색'],['mc2','주황색'],['mc3','분홍색']];
-function czItems(){const blk=cz.g==='bf'||cz.g==='bm';return CZ.map(([k,l,op])=>k==='o'&&blk?[k,l,CZ_BLK]:[k,l,op]).map(([k,l,op])=>'<b>'+l+'</b><br>'+op.map(([v,t])=>`<button class="chip${cz[k]===v?' on':''}" onclick="setCz('${k}','${v}')">${t}</button>`).join(''))}
+const czNeed=(k,v)=>k==='g'&&(v==='bf'||v==='bm')?100:k==='o'&&(v==='acnl'||v==='boyStyle')?200:0;
+let toastT=0;function toast(t){let e=document.getElementById('toast');if(!e){e=document.createElement('div');e.id='toast';document.body.appendChild(e)}e.textContent=t;e.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>{e.style.display='none'},1900)}
+function czItems(){const blk=cz.g==='bf'||cz.g==='bm';return CZ.map(([k,l,op])=>k==='o'&&blk?[k,l,CZ_BLK]:[k,l,op]).map(([k,l,op])=>{
+  if(k==='o'&&!blk)op=op.filter(([v])=>v==='acnl'?cz.g==='f':v==='boyStyle'?cz.g==='m':true);
+  return '<b>'+l+'</b><br>'+op.map(([v,t])=>{const lock=(msv.total||0)<czNeed(k,v);return `<button class="chip${cz[k]===v?' on':''}${lock?' lock':''}" onclick="setCz('${k}','${v}')">${t}</button>`}).join('')})}
 function openCz(){panel('🎨 꾸미기',czItems())}
-function setCz(k,v){cz[k]=v;if(k==='o'){if(v==='acnl')cz.g='f';if(v==='boyStyle')cz.g='m'}if(k==='g'){const blk=v==='bf'||v==='bm';if(blk&&!/^mc[123]$/.test(cz.o))cz.o='mc1';if(!blk&&/^mc/.test(cz.o))cz.o='basic';if((cz.o==='acnl'&&v==='m')||(cz.o==='boyStyle'&&v==='f'))cz.o='basic'}rebuildMe();try{localStorage.setItem('czv1',JSON.stringify(cz))}catch(e){}openCz()}me.g.rotation.y=Math.PI;
+function setCz(k,v){const need=czNeed(k,v);if((msv.total||0)<need){toast('점수가 '+need+'점이 넘어야 할 수 있어요');return}cz[k]=v;if(k==='o'){if(v==='acnl')cz.g='f';if(v==='boyStyle')cz.g='m'}if(k==='g'){const blk=v==='bf'||v==='bm';if(blk&&!/^mc[123]$/.test(cz.o))cz.o='mc1';if(!blk&&/^mc/.test(cz.o))cz.o='basic';if((cz.o==='acnl'&&v==='m')||(cz.o==='boyStyle'&&v==='f'))cz.o='basic'}rebuildMe();try{localStorage.setItem('czv1',JSON.stringify(cz))}catch(e){}openCz()}me.g.rotation.y=Math.PI;
 // 말풍선
 const bs=[];
 function say(p,txt,ms=2600,cls=''){if(p===me&&ms>0&&window.MPsay)window.MPsay(txt,ms);const e=document.createElement('div');e.className='b '+cls;e.textContent=txt;B.appendChild(e);const o={e,p};bs.push(o);if(ms)setTimeout(()=>{e.remove();bs.splice(bs.indexOf(o),1)},ms)}
@@ -482,7 +488,8 @@ let LB={top:[],on:[]},myUid='';
 function msRoll(){let ch=false;if(msv.dk!==dKey()){msv.dk=dKey();msv.d=[];msv.bd=false;ch=true}if(msv.wk!==wKey()){msv.wk=wKey();msv.w=[];msv.bw=false;ch=true}if(ch)msSave()}
 function msSave(){try{localStorage.setItem('dkms',JSON.stringify(msv))}catch(e){}}
 const PANEL_MS='🎯 미션',PANEL_FR='👥 접속 현황';
-function msUpd(){msRoll();document.getElementById('mc').textContent=msv.d.length+'/'+MS.d.length;const t=document.getElementById('pt').textContent;if(pn.style.display==='flex'){if(t===PANEL_MS)openMs();else if(t===PANEL_FR)openFriends()}}
+function msNext(){for(const c of ['d','w']){const m=MS[c].find(x=>!msv[c].includes(x[0]));if(m)return(c==='d'?'🎯 오늘의 미션 · ':'🎯 주간 미션 · ')+m[1]}return'🎉 모든 미션을 완료했어요!'}
+function msUpd(){msRoll();document.getElementById('mc').textContent=msv.d.length+'/'+MS.d.length;document.getElementById('mm').textContent=msNext();const t=document.getElementById('pt').textContent;if(pn.style.display==='flex'){if(t===PANEL_MS)openMs();else if(t===PANEL_FR)openFriends()}}
 function mission(id){msRoll();for(const c of ['d','w'])if(MS[c].some(m=>m[0]===id)&&!msv[c].includes(id)){msv[c].push(id);msv.total=(msv.total||0)+PTS[c];
   if(msv[c].length===MS[c].length){const b=c==='d'?'bd':'bw';if(!msv[b]){msv[b]=true;msv.total+=BONUS[c]}}
   msSave();msUpd();MP.send({t:'m',id})}}
@@ -491,7 +498,7 @@ function openMs(){msRoll();const out=['<div class="msc">⭐ 내 누적 점수 <b
  for(const c of ['d','w','r']){const L=MS[c],n=c==='r'?0:msv[c].length,all=c!=='r'&&n===L.length;
   const rows=L.map(m=>{const d=c!=='r'&&msv[c].includes(m[0]);return '<label class="mi'+(d?' on':'')+'"><input type="checkbox" '+(d?'checked ':'')+'tabindex="-1"><span class="nm">'+m[1]+'</span>'+(c==='r'?'':'<b class="pt">+'+PTS[c]+'점</b>')+'</label>'}).join('');
   const bonus=c==='r'?'':'<div class="mb">'+(all?'🎉 모두 완료 보너스 +'+BONUS[c]+'점 획득!':'✨ 모두 완료하면 보너스 +'+BONUS[c]+'점')+'</div>';
-  out.push('<div class="mcat'+(all?' done':'')+(c==='r'?' real':'')+'"><div class="mh"><input type="checkbox" '+(all?'checked ':'')+'tabindex="-1"> '+MN[c]+'<i>'+(c==='r'?'목록만':all?'완료!':n+'/'+L.length)+'</i></div>'+bonus+rows+'</div>')}
+  out.push('<div class="mcat'+(all?' done':'')+(c==='r'?' real':'')+'"><div class="mh"><input type="checkbox" '+(all?'checked ':'')+'tabindex="-1"> '+MN[c]+'<i>'+(all?'완료!':n+'/'+L.length)+'</i></div>'+bonus+rows+'</div>')}
  panel(PANEL_MS,out)}
 const MEDAL=['🥇','🥈','🥉'];
 function openFriends(){
