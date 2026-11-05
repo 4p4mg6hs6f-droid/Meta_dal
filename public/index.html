@@ -45,14 +45,19 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 #pn header button{border:0;background:var(--ac);color:#fff;padding:6px 12px;border-radius:12px;font-size:13px;cursor:pointer;flex:none}
 #pn .chip{border:1px solid rgba(127,127,127,.4);background:transparent;color:var(--fg);border-radius:14px;padding:6px 11px;margin:4px 6px 2px 0;font-size:13px;cursor:pointer}
 #pn .chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-#trow{display:flex;align-items:center;gap:4px;flex-wrap:wrap;max-width:calc(100% - 80px)}#mps{background:var(--card);color:var(--fg);padding:5px 7px;border-radius:12px;font-size:11px;pointer-events:none;white-space:nowrap}
+#trow{display:flex;align-items:center;gap:4px;flex-wrap:wrap;max-width:calc(100% - 80px)}#mps{background:var(--card);color:var(--fg);padding:5px 7px;border-radius:12px;font-size:11px;pointer-events:auto;cursor:pointer;white-space:nowrap}
 #mm{flex:1;min-width:0}#msn em{font-style:normal;opacity:.6;flex:none;font-variant-numeric:tabular-nums}
 #czb{position:fixed;right:58px;top:calc(env(safe-area-inset-top,0px) + 10px);border:0;background:var(--btn);color:var(--fg);padding:9px 12px;border-radius:18px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
 #pn .mcat{border:2px solid var(--ac);border-radius:14px;overflow:hidden}#pn .mcat.done{border-color:#2fb67c}#pn .mcat.real{border-color:#8a8fa3}
 #pn .mh{display:flex;align-items:center;gap:8px;background:var(--ac);color:#fff;padding:9px 12px;font-size:15px;font-weight:800;letter-spacing:.2px}#pn .mcat.done .mh{background:#2fb67c}#pn .mcat.real .mh{background:#8a8fa3}
-#pn .mh i{margin-left:auto;font-style:normal;font-weight:700;font-size:12px;background:rgba(255,255,255,.28);border-radius:10px;padding:1px 8px}
+#pn .mh i{white-space:nowrap;margin-left:auto;font-style:normal;font-weight:700;font-size:12px;background:rgba(255,255,255,.28);border-radius:10px;padding:1px 8px}
 #pn .mi{display:flex;align-items:center;gap:9px;padding:7px 12px 7px 24px;font-size:13px;font-weight:400;border-top:1px solid rgba(127,127,127,.22)}#pn .mi.on{opacity:.55;text-decoration:line-through}
 #pn .mh input{accent-color:#fff}
+#pn .mi .nm{flex:1;min-width:0}#pn .mi.on .nm{text-decoration:line-through}#pn .mi .pt{margin-left:auto;font-weight:800;font-size:12px;color:var(--ac);flex:none}#pn .mi.on .pt{color:#2fb67c}
+#pn .mb{padding:5px 12px;font-size:12px;background:rgba(255,200,80,.2);text-align:center;font-weight:600}
+#pn .msc{background:var(--ac);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center}#pn .msc b{font-size:18px}
+#pn .mcat.gold{border-color:#e8b020}#pn .mcat.gold .mh{background:#e8b020}
+#pn .mi.fr{padding-left:12px}#pn .mi.fr.me{background:rgba(255,107,129,.13);font-weight:700}#pn .mi .rk{width:26px;text-align:center;flex:none;font-weight:800}#pn .mebadge{font-style:normal;margin-left:6px;background:var(--ac);color:#fff;border-radius:8px;padding:1px 7px;font-size:11px}
 #pn .mh input,#pn .mi input{accent-color:var(--ac);width:18px;height:18px;margin:0;pointer-events:none;flex:none;box-sizing:border-box}
 #pn .pinbox{display:flex;gap:8px;justify-content:center}#pn .pinbox span{width:34px;height:42px;border:2px solid rgba(127,127,127,.5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--ac)}
 #pn .pinbox.sh{animation:shk .35s}@keyframes shk{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
@@ -466,19 +471,34 @@ const MS={d:[['recep','접수하기'],['news','소식보기'],['sit','의자에 
  w:[['xray','엑스레이 찍기'],['iv','수액 맞기'],['rabbit','토끼 먹이주기'],['squirrel','다람쥐 먹이주기'],['hug','동물 안기']],
  r:[['vacc','예방주사 맞기']]};
 const MN={d:'일일 미션',w:'주간 미션',r:'현실 미션'};
-const dKey=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
-const wKey=()=>{const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
-let msv={dk:'',wk:'',d:[],w:[]};
+const kstD=()=>new Date(Date.now()+9*3600e3);
+const dKey=()=>{const d=kstD();return d.getUTCFullYear()+'-'+(d.getUTCMonth()+1)+'-'+d.getUTCDate()};
+const wKey=()=>{const d=kstD();d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7));return d.getUTCFullYear()+'-'+(d.getUTCMonth()+1)+'-'+d.getUTCDate()};
+const PTS={d:10,w:15},BONUS={d:10,w:20};
+let msv={dk:'',wk:'',d:[],w:[],total:0,bd:false,bw:false};
 try{const x=JSON.parse(localStorage.getItem('dkms')||'null');if(x)msv=Object.assign(msv,x)}catch(e){}
-function msRoll(){let ch=false;if(msv.dk!==dKey()){msv.dk=dKey();msv.d=[];ch=true}if(msv.wk!==wKey()){msv.wk=wKey();msv.w=[];ch=true}if(ch)msSave()}
+let CID='';try{CID=localStorage.getItem('dkcid')||'';if(!CID){CID=Math.random().toString(36).slice(2,12)+Date.now().toString(36);localStorage.setItem('dkcid',CID)}}catch(e){CID=Math.random().toString(36).slice(2,12)+Date.now().toString(36)}
+let LB={top:[],on:[]},myUid='';
+function msRoll(){let ch=false;if(msv.dk!==dKey()){msv.dk=dKey();msv.d=[];msv.bd=false;ch=true}if(msv.wk!==wKey()){msv.wk=wKey();msv.w=[];msv.bw=false;ch=true}if(ch)msSave()}
 function msSave(){try{localStorage.setItem('dkms',JSON.stringify(msv))}catch(e){}}
-function msUpd(){msRoll();document.getElementById('mc').textContent=msv.d.length+'/'+MS.d.length;if(pn.style.display==='flex'&&document.getElementById('pt').textContent==='🎯 미션')openMs()}
-function mission(id){msRoll();for(const c of ['d','w'])if(MS[c].some(m=>m[0]===id)&&!msv[c].includes(id)){msv[c].push(id);msSave();msUpd()}}
-function openMs(){msRoll();const out=[];
+const PANEL_MS='🎯 미션',PANEL_FR='👥 접속 현황';
+function msUpd(){msRoll();document.getElementById('mc').textContent=msv.d.length+'/'+MS.d.length;const t=document.getElementById('pt').textContent;if(pn.style.display==='flex'){if(t===PANEL_MS)openMs();else if(t===PANEL_FR)openFriends()}}
+function mission(id){msRoll();for(const c of ['d','w'])if(MS[c].some(m=>m[0]===id)&&!msv[c].includes(id)){msv[c].push(id);msv.total=(msv.total||0)+PTS[c];
+  if(msv[c].length===MS[c].length){const b=c==='d'?'bd':'bw';if(!msv[b]){msv[b]=true;msv.total+=BONUS[c]}}
+  msSave();msUpd();MP.send({t:'m',id})}}
+const esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function openMs(){msRoll();const out=['<div class="msc">⭐ 내 누적 점수 <b>'+(msv.total||0)+'점</b></div>'];
  for(const c of ['d','w','r']){const L=MS[c],n=c==='r'?0:msv[c].length,all=c!=='r'&&n===L.length;
-  const rows=L.map(m=>{const d=c!=='r'&&msv[c].includes(m[0]);return '<label class="mi'+(d?' on':'')+'"><input type="checkbox" '+(d?'checked ':'')+'tabindex="-1"> '+m[1]+'</label>'}).join('');
-  out.push('<div class="mcat'+(all?' done':'')+(c==='r'?' real':'')+'"><div class="mh"><input type="checkbox" '+(all?'checked ':'')+'tabindex="-1"> '+MN[c]+'<i>'+(c==='r'?'목록만':all?'완료!':n+'/'+L.length)+'</i></div>'+rows+'</div>')}
- panel('🎯 미션',out)}
+  const rows=L.map(m=>{const d=c!=='r'&&msv[c].includes(m[0]);return '<label class="mi'+(d?' on':'')+'"><input type="checkbox" '+(d?'checked ':'')+'tabindex="-1"><span class="nm">'+m[1]+'</span>'+(c==='r'?'':'<b class="pt">+'+PTS[c]+'점</b>')+'</label>'}).join('');
+  const bonus=c==='r'?'':'<div class="mb">'+(all?'🎉 모두 완료 보너스 +'+BONUS[c]+'점 획득!':'✨ 모두 완료하면 보너스 +'+BONUS[c]+'점')+'</div>';
+  out.push('<div class="mcat'+(all?' done':'')+(c==='r'?' real':'')+'"><div class="mh"><input type="checkbox" '+(all?'checked ':'')+'tabindex="-1"> '+MN[c]+'<i>'+(c==='r'?'목록만':all?'완료!':n+'/'+L.length)+'</i></div>'+bonus+rows+'</div>')}
+ panel(PANEL_MS,out)}
+const MEDAL=['🥇','🥈','🥉'];
+function openFriends(){
+ const live=MP.live()||LB.on.length>0;
+ const rowOn=live&&LB.on.length?LB.on.map(e=>'<div class="mi fr'+(e[0]===MP.myId()?' me':'')+'"><span class="nm">'+esc(e[2])+(e[0]===MP.myId()?'<em class="mebadge">나</em>':'')+'</span><b class="pt">'+e[3]+'점</b></div>').join(''):'<div class="mi fr"><span class="nm">'+esc(myName)+'<em class="mebadge">나</em></span><b class="pt">'+(msv.total||0)+'점</b></div>';
+ const rowTop=LB.top.length?LB.top.map((e,i)=>'<div class="mi fr'+(myUid&&e[0]===myUid?' me':'')+'"><span class="rk">'+(MEDAL[i]||(i+1))+'</span><span class="nm">'+esc(e[1])+(myUid&&e[0]===myUid?'<em class="mebadge">나</em>':'')+'</span><b class="pt">'+e[2]+'점</b></div>').join(''):'<div class="mi fr"><span class="nm" style="opacity:.6">'+(live?'아직 점수를 얻은 친구가 없어요. 미션을 해 보세요!':'서버에 연결되면 순위가 보여요')+'</span></div>';
+ panel(PANEL_FR,['<div class="mcat"><div class="mh">👥 지금 놀러 온 친구들<i>'+(live&&LB.on.length?LB.on.length:1)+'명</i></div>'+rowOn+'</div>','<div class="mcat gold"><div class="mh">🏆 명예의 전당 TOP 10<i>누적 점수</i></div>'+rowTop+'</div>'])}
 document.getElementById('msn').addEventListener('click',openMs);
 msUpd();setInterval(msUpd,60000);
 // ===== 선생님 이름표 (숨겨진 설정) =====
@@ -702,7 +722,7 @@ const MP=(()=>{
  const url=q.get('ws')||window.WS_URL||((location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws');
  const VER='v3';
  const R=new Map();let ws=null,myId=null,tries=0,opened=false,lastSent='',acc=0;
- const stat=document.createElement('div');stat.id='mps';stat.title=VER;stat.textContent='⚪ 오프라인';document.getElementById('trow').appendChild(stat);
+ const stat=document.createElement('div');stat.id='mps';stat.title=VER;stat.textContent='⚪ 오프라인';document.getElementById('trow').appendChild(stat);stat.addEventListener('click',openFriends);
  const rd=v=>Math.round(v*1000)/1000;
  const info=()=>({x:rd(me.g.position.x),z:rd(me.g.position.z),ry:rd(me.g.rotation.y),m:me.mode,sy:me.sitY??.07,n:myName,hd:holding||'',c:{g:cz.g,h:cz.h,o:cz.o}});
  let lastAn=-1e9;
@@ -720,7 +740,10 @@ const MP=(()=>{
  function connect(){try{ws=new WebSocket(url)}catch(e){retry();return}
   ws.onopen=()=>{opened=true;tries=0;lastSent='';stat2()};
   ws.onmessage=ev=>{let m;try{m=JSON.parse(ev.data)}catch(e){return}
-   if(m.t==='hello'){myId=m.id;m.players.forEach(add);if(m.staff)stRemote(m.staff)}
+   if(m.t==='hello'){myId=m.id;m.players.forEach(add);if(m.staff)stRemote(m.staff);
+    ws.send(JSON.stringify({t:'hi',cid:CID,n:myName}));msRoll();['d','w'].forEach(c=>msv[c].forEach(id=>ws.send(JSON.stringify({t:'m',id}))))}
+   else if(m.t==='ms'){msv.dk=dKey();msv.wk=wKey();msv.d=m.d;msv.w=m.w;msv.total=m.total;msv.bd=m.bd;msv.bw=m.bw;myUid=m.u;msSave();msUpd()}
+   else if(m.t==='lb'){LB={top:m.top,on:m.on};if(pn.style.display==='flex'&&document.getElementById('pt').textContent===PANEL_FR)openFriends()}
    else if(m.t==='staff'){stRemote({[m.k]:{on:m.on,name:m.name}})}
    else if(m.t==='u'&&m.id!==myId)add(m)
    else if(m.t==='an'){lastAn=performance.now();m.a.forEach((d,i)=>{const a=AN[i];if(!a)return;if(a.nx===undefined){a.x=d[0];a.z=d[1]}a.nx=d[0];a.nz=d[1];a.nmv=d[2];a.hugBy=d[3]})}
