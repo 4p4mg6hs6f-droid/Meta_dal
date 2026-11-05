@@ -513,18 +513,21 @@ const STAFF=[['doc','의사선생님',()=>doc],['man','접수선생님',()=>man]
 let stf={};try{stf=JSON.parse(localStorage.getItem('dkstaff')||'{}')||{}}catch(e){}
 const stTag={};
 function stSave(){try{localStorage.setItem('dkstaff',JSON.stringify(stf))}catch(e){}}
-function stPush(k){const c=stCfg(k);MP.send({t:'staff',pin:'090909',k,on:!!c.on,name:c.name})}   // 서버에 저장 → 모든 접속자에게 전달
+function stPush(k){const c=stCfg(k);MP.send({t:'staff',pin:stPin,k,on:!!c.on,name:c.name})}   // 서버에 저장 → 모든 접속자에게 전달
 function stRemote(map){for(const k in map){const d=STAFF.find(x=>x[0]===k),v=map[k];if(!d||!v)continue;stf[k]={on:!!v.on,name:String(v.name||d[1]).slice(0,24)};stApply(k)}stSave()}
 function stCfg(k){const d=STAFF.find(x=>x[0]===k);return stf[k]||(stf[k]={on:false,name:d[1]})}
 function stApply(k){const d=STAFF.find(x=>x[0]===k),c=stCfg(k);
  if(stTag[k]){stTag[k].e.remove();const i=bs.indexOf(stTag[k]);if(i>=0)bs.splice(i,1);stTag[k]=null}
  if(c.on){const t=mkTag(d[2](),c.name||d[1],false);const av=t.e.querySelector('.av');if(av)av.textContent='선';stTag[k]=t}}
 STAFF.forEach(x=>stApply(x[0]));
-let pin='';const setBody=(t,h)=>{document.getElementById('pt').textContent=t;document.getElementById('pb').innerHTML=h;pn.style.display='flex'};
+let pin='',stPin='',pinWait=false,pinTimer=null;const setBody=(t,h)=>{document.getElementById('pt').textContent=t;document.getElementById('pb').innerHTML=h;pn.style.display='flex'};
 function pinRender(sh){setBody('🔒 비밀번호','<li><div class="pinbox'+(sh?' sh':'')+'">'+[0,1,2,3,4,5].map(i=>'<span>'+(i<pin.length?'★':'')+'</span>').join('')+'</div></li><li><div class="pad">'+[1,2,3,4,5,6,7,8,9,'⌫',0,''].map(k=>k===''?'<span></span>':'<button onclick="pinKey(\''+k+'\')">'+k+'</button>').join('')+'</div></li>')}
-function pinKey(k){if(k==='⌫'){pin=pin.slice(0,-1);pinRender();return}if(pin.length>=6)return;pin+=k;pinRender();
- if(pin.length===6){const ok=pin==='090909';setTimeout(()=>{if(ok){pin='';openStaff()}else{pin='';pinRender(true)}},180)}}
-function openPin(){pin='';pinRender()}
+function pinKey(k){if(pinWait)return;if(k==='⌫'){pin=pin.slice(0,-1);pinRender();return}if(pin.length>=6)return;pin+=k;pinRender();
+ if(pin.length===6){pinWait=true;MP.send({t:'pin',pin});
+  clearTimeout(pinTimer);pinTimer=setTimeout(()=>pinResult(false),4000)}}
+function pinResult(ok){if(!pinWait)return;pinWait=false;clearTimeout(pinTimer);
+ if(ok){stPin=pin;pin='';openStaff()}else{pin='';pinRender(true)}}
+function openPin(){pin='';pinWait=false;clearTimeout(pinTimer);pinRender()}
 function openStaff(){setBody('🧑‍⚕️ 선생님 이름표','<li>이름표를 켜고 끌 수 있고, 글자도 바꿀 수 있어요.</li>'+STAFF.map(d=>{const c=stCfg(d[0]);return '<li><button class="chip stf" onclick="stEdit(\''+d[0]+'\')"><span>'+d[1]+'</span><i>'+(c.on?'켜짐 · '+c.name.replace(/</g,'&lt;'):'꺼짐')+'</i></button></li>'}).join(''))}
 function stEdit(k){const d=STAFF.find(x=>x[0]===k),c=stCfg(k);
  setBody(d[1],'<li><button class="chip'+(c.on?' on':'')+'" onclick="stToggle(\''+k+'\')">이름표 '+(c.on?'켜짐 (눌러서 끄기)':'꺼짐 (눌러서 켜기)')+'</button></li><li>이름표에 쓸 글자</li><li><input id="sti" maxlength="24" value="'+c.name.replace(/"/g,'&quot;')+'" placeholder="이름표 글자 (최대 24글자)"></li><li><button class="chip on" onclick="stSaveName(\''+k+'\')">저장</button><button class="chip" onclick="openStaff()">← 목록</button></li>')}
@@ -751,6 +754,7 @@ const MP=(()=>{
     ws.send(JSON.stringify({t:'hi',cid:CID,n:myName}));msRoll();['d','w'].forEach(c=>msv[c].forEach(id=>ws.send(JSON.stringify({t:'m',id}))))}
    else if(m.t==='ms'){msv.dk=dKey();msv.wk=wKey();msv.d=m.d;msv.w=m.w;msv.total=m.total;msv.bd=m.bd;msv.bw=m.bw;myUid=m.u;msSave();msUpd()}
    else if(m.t==='lb'){LB={top:m.top,on:m.on};if(pn.style.display==='flex'&&document.getElementById('pt').textContent===PANEL_FR)openFriends()}
+   else if(m.t==='pinok'){pinResult(!!m.ok)}
    else if(m.t==='staff'){stRemote({[m.k]:{on:m.on,name:m.name}})}
    else if(m.t==='u'&&m.id!==myId)add(m)
    else if(m.t==='an'){lastAn=performance.now();m.a.forEach((d,i)=>{const a=AN[i];if(!a)return;if(a.nx===undefined){a.x=d[0];a.z=d[1]}a.nx=d[0];a.nz=d[1];a.nmv=d[2];a.hugBy=d[3]})}
