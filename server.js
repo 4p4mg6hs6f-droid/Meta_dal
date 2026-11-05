@@ -56,7 +56,23 @@ const kvSave = (key, obj) => kvCmd(['SET', key, JSON.stringify(obj)]);
 // ---------- 선생님 이름표 (모든 접속자에게 공유) ----------
 const STAFF_FILE = path.join(__dirname, 'staff.json');
 const STAFF_DEF = { doc: '의사선생님', man: '접수선생님', nu1: '주사선생님민트', nu2: '주사선생님핑크', rad: '방사선선생님' };
-const STAFF_PIN = process.env.STAFF_PIN || '090909';
+// PIN은 코드에 적지 않고 Render 환경변수 STAFF_PIN 에만 둡니다. 없으면 이름표 변경 기능이 잠깁니다.
+const STAFF_PIN = String(process.env.STAFF_PIN || '').trim();
+if (!STAFF_PIN) console.warn('STAFF_PIN 환경변수가 없어 선생님 이름표 변경이 잠겨 있습니다.');
+const sha = v => crypto.createHash('sha256').update(String(v)).digest();
+const PIN_HASH = sha(STAFF_PIN);
+const pinFails = new Map();                       // IP -> { n: 틀린 횟수, until: 잠금 해제 시각 }
+const PIN_MAX = 5, PIN_LOCK_MS = 10 * 60 * 1000;
+function checkPin(ip, pin) {
+  if (!STAFF_PIN || typeof pin !== 'string' || pin.length > 32) return false;
+  const f = pinFails.get(ip) || { n: 0, until: 0 };
+  if (f.until > Date.now()) return false;          // 잠금 중에는 맞아도 거절
+  if (crypto.timingSafeEqual(sha(pin), PIN_HASH)) { pinFails.delete(ip); return true; }
+  if (++f.n >= PIN_MAX) { f.n = 0; f.until = Date.now() + PIN_LOCK_MS; }
+  pinFails.set(ip, f);
+  return false;
+}
+setInterval(() => { const t = Date.now(); for (const [k, f] of pinFails) if (f.until < t && f.n === 0) pinFails.delete(k); }, 600000);
 const staff = {};
 for (const k in STAFF_DEF) staff[k] = { on: false, name: STAFF_DEF[k] };
 function applyStaff(saved) {
@@ -151,7 +167,8 @@ function broadcast(obj, except) {
   for (const c of wss.clients) if (c !== except && c.readyState === 1 && c.pid) c.send(s);
 }
 
-wss.on('connection', ws => {
+wss.on('connection', (ws, req) => {
+  ws.ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
   if (players.size >= MAX_PLAYERS) { ws.close(1013, 'full'); return; }
   const id = nextId++;
   ws.pid = id; ws.alive = true; ws.seen = false; ws.cnt = 0; ws.lastSay = 0;
@@ -172,8 +189,10 @@ wss.on('connection', ws => {
       if (typeof m.cid === 'string' && /^[A-Za-z0-9]{8,40}$/.test(m.cid)) { ws.cid = m.cid; recOf(m.cid, me.seen ? me.n : undefined); sendMs(ws); scheduleLb(); }
     } else if (m.t === 'm') {
       if (ws.cid && typeof m.id === 'string') { award(ws.cid, m.id, me.n); sendMs(ws); scheduleLb(); }
+    } else if (m.t === 'pin') {
+      send(ws, { t: 'pinok', ok: checkPin(ws.ip, m.pin) });
     } else if (m.t === 'staff') {
-      if (m.pin !== STAFF_PIN || !(m.k in STAFF_DEF) || typeof m.on !== 'boolean') return;
+      if (!(m.k in STAFF_DEF) || typeof m.on !== 'boolean' || !checkPin(ws.ip, m.pin)) return;
       const nm = typeof m.name === 'string' ? m.name.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 24) : '';
       staff[m.k] = { on: m.on, name: nm || STAFF_DEF[m.k] };
       saveStaff();
