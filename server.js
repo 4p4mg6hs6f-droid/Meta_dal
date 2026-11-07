@@ -148,7 +148,7 @@ const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 2048 });
 const players = new Map();            // id -> 상태
 let nextId = 1;
 const num = (v, lo, hi, d) => Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d;
-const MODES = new Set(['idle', 'walk', 'sit', 'wave', 'steth', 'shot', 'eat', 'xr', 'read', 'lie', 'hug']);
+const MODES = new Set(['idle', 'walk', 'sit', 'wave', 'steth', 'shot', 'eat', 'xr', 'read', 'lie', 'hug', 'bow', 'cheer', 'clap']);
 const OPT = { g: ['f', 'm', 'bf', 'bm'], h: ['none', 'bunny', 'cat', 'crown', 'flower'], o: ['basic', 'spider', 'rain', 'acnl', 'boyStyle', 'mcraft', 'mc1', 'mc2', 'mc3'] };
 const pick = (list, v, d) => list.includes(v) ? v : d;
 
