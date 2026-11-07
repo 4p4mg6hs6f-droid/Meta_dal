@@ -588,7 +588,7 @@ async function cafe(i,t){if(!await go(24,[-136,-51][i]))return;face(Math.PI/2);m
 function cafeNear(t){const y=PX(me.g.position)[1];cafe(Math.abs(y+136)<Math.abs(y+51)?0:1,t)}
 async function snackAct(t){if(!await go(208,240))return;face(-Math.PI/2);say(me,'우와, 간식이다! 🍪',2200);await sleep(1300);if(t!==token)return;me.mode='eat';sfx('munch');mission('snack');await sleep(2200);if(t!==token)return;say(me,'냠냠~ 맛있다 😋',2200);await sleep(1000);if(t!==token)return;me.mode='idle'}
 // ===== 감정 표현 (안녕 / 감사 / 신나 / 짝짝) =====
-const emEl=document.getElementById('em'),emB=document.getElementById('emb');muteUi();
+const emEl=document.getElementById('em'),emB=document.getElementById('emb');
 function muteUi(){const b=document.getElementById('mub');b.textContent=muted?'🔇':'🔊';b.title=muted?'소리 켜기':'소리 끄기';b.setAttribute('aria-label',b.title)}
 function muteToggle(){muted=!muted;try{localStorage.setItem('dkmute',muted?'1':'0')}catch(e){}
  if(muted){if(audCtx)try{audCtx.suspend()}catch(e){}}else aud();muteUi();toast(muted?'소리를 껐어요 🔇':'소리를 켰어요 🔊')}
@@ -598,6 +598,7 @@ cv.addEventListener('pointerdown',emClose);
 const EMO={hi:{mode:'wave',say:'안녕! 👋',dur:2600,ms:2400},thx:{mode:'bow',say:'감사합니다 🙇',dur:1300,ms:2400},joy:{mode:'cheer',say:'야호! 🎉',dur:2400,ms:2200},clap:{mode:'clap',say:'짝짝짝짝! 👏',dur:2300,ms:2200}};
 let audCtx=null;
 let muted=false;try{muted=localStorage.getItem('dkmute')==='1'}catch(e){}
+muteUi();
 function aud(){if(muted)return null;try{audCtx=audCtx||new(window.AudioContext||window.webkitAudioContext)();if(audCtx.state==='suspended')audCtx.resume()}catch(e){}return audCtx}
 function clapSnd(){const c=aud();if(!c)return;try{const n=Math.floor(c.sampleRate*.1),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);
  for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
