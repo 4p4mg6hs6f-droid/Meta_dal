@@ -74,10 +74,25 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 .cd p{margin:4px 0}.cd .tel{font-weight:700;color:var(--ac)}.cd .nt{opacity:.7;font-size:13px}
 .cd.wn{border-color:var(--ac);background:rgba(255,143,177,.14)}.sec{display:block;margin-top:6px}
 
+#em{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);width:54px;height:54px;z-index:20}
+#emb{position:absolute;inset:0;border:0;border-radius:50%;background:var(--ac);color:#fff;font-size:26px;box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:pointer;padding:0}
+#emb:active{transform:scale(.92)}
+.ei{position:absolute;left:2px;top:2px;width:50px;height:50px;border-radius:50%;border:0;background:var(--btn);color:var(--fg);box-shadow:0 2px 8px rgba(0,0,0,.25);font-size:21px;line-height:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0;cursor:pointer;transform:translate(0,0) scale(.3);opacity:0;pointer-events:none;transition:transform .28s cubic-bezier(.3,1.4,.5,1),opacity .2s}
+.ei small{font-size:10px;font-weight:700;line-height:1}
+.ei:active{background:var(--ac)}
+#em.open .ei{transform:translate(var(--dx),var(--dy)) scale(1);opacity:1;pointer-events:auto}
+#em.open .ei:nth-child(2){transition-delay:.03s}#em.open .ei:nth-child(3){transition-delay:.06s}#em.open .ei:nth-child(4){transition-delay:.09s}
 </style></head><body>
 <canvas id="c"></canvas><div id="B"></div><div id="fl" style="position:fixed;inset:0;background:#fff;opacity:0;transition:opacity .5s;pointer-events:none"></div>
 <div id="top"><div id="trow"><b>🏥 메타 달소아청소년과</b></div><small id="tip"><span id="tm"></span><em id="tc"></em></small><small id="msn"><span id="mm">🎯 오늘의 미션</span><em id="mc"></em></small></div>
 <div id="dp"><i data-k="u">▲</i><i data-k="l">◀</i><i data-k="r">▶</i><i data-k="d">▼</i></div>
+<div id="em">
+<button class="ei" style="--dx:-88px;--dy:0px" onclick="emo('hi')" aria-label="안녕">👋<small>안녕</small></button>
+<button class="ei" style="--dx:-76px;--dy:-44px" onclick="emo('thx')" aria-label="감사">🙇<small>감사</small></button>
+<button class="ei" style="--dx:-44px;--dy:-76px" onclick="emo('joy')" aria-label="신나">🎉<small>신나</small></button>
+<button class="ei" style="--dx:0px;--dy:-88px" onclick="emo('clap')" aria-label="짝짝">👏<small>짝짝</small></button>
+<button id="emb" onclick="emToggle()" aria-label="감정 표현">😊</button>
+</div>
 <div id="bar">
 <button onclick="run(recep)">👋 접수하기</button>
 <button onclick="run(news1)">📋 소식 보기</button>
@@ -570,6 +585,21 @@ function ivNear(t){const y=PX(me.g.position)[1];iv(y<-94?0:1,t)}
 async function cafe(i,t){if(!await go(24,[-136,-51][i]))return;face(Math.PI/2);me.mode='sit';me.g.position.y=.07;say(me,'아늑하다~ ☕',2500);mission('cafe')}
 function cafeNear(t){const y=PX(me.g.position)[1];cafe(Math.abs(y+136)<Math.abs(y+51)?0:1,t)}
 async function snackAct(t){if(!await go(208,240))return;face(-Math.PI/2);say(me,'우와, 간식이다! 🍪',2200);await sleep(1300);if(t!==token)return;me.mode='eat';mission('snack');await sleep(2200);if(t!==token)return;say(me,'냠냠~ 맛있다 😋',2200);await sleep(1000);if(t!==token)return;me.mode='idle'}
+// ===== 감정 표현 (안녕 / 감사 / 신나 / 짝짝) =====
+const emEl=document.getElementById('em'),emB=document.getElementById('emb');
+function emClose(){emEl.classList.remove('open');emB.textContent='😊'}
+function emToggle(){const o=emEl.classList.toggle('open');emB.textContent=o?'✕':'😊'}
+cv.addEventListener('pointerdown',emClose);
+const EMO={hi:{mode:'wave',say:'안녕! 👋',dur:2600,ms:2400},thx:{mode:'bow',say:'감사합니다 🙇',dur:2600,ms:2400},joy:{mode:'cheer',say:'야호! 🎉',dur:2400,ms:2200},clap:{mode:'clap',say:'짝짝짝짝! 👏',dur:2300,ms:2200}};
+let audCtx=null;
+function aud(){try{audCtx=audCtx||new(window.AudioContext||window.webkitAudioContext)();if(audCtx.state==='suspended')audCtx.resume()}catch(e){}return audCtx}
+function clapSnd(){const c=aud();if(!c)return;try{const n=Math.floor(c.sampleRate*.1),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);
+ for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
+ const s=c.createBufferSource();s.buffer=b;const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.8;
+ const g=c.createGain();g.gain.value=.9;s.connect(f);f.connect(g);g.connect(c.destination);s.start()}catch(e){}}
+function emo(k){emClose();aud();run(async t=>{const E=EMO[k];face(camA);me.mode=E.mode;say(me,E.say,E.ms);
+ if(k==='clap')for(let i=0;i<8;i++)setTimeout(()=>{if(t===token&&me.mode==='clap')clapSnd()},145+250*i);
+ await sleep(E.dur);if(t!==token)return;me.mode='idle'})}
 // 입력
 const ray=new THREE.Raycaster(),pl=new THREE.Plane(new THREE.Vector3(0,1,0),0);
 const clicks=[];function mk(objs,fn){objs.forEach(o=>{const l=o.isMesh?[o]:[];o.traverse(c=>{if(c.isMesh)l.push(c)});l.forEach(m=>{m.userData.fn=fn;clicks.push(m)})})}
@@ -772,11 +802,13 @@ const MP=(()=>{
   R.forEach(p=>{const g=p.g,k=Math.min(1,dt*10);
    g.position.x+=(p.tx-g.position.x)*k;g.position.z+=(p.tz-g.position.z)*k;
    let da=p.try-g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));g.rotation.y+=da*Math.min(1,dt*12);
-   const m=p.mode;g.position.y=m==='lie'?.8:(m==='sit'||m==='read')?(p.sy??.07):m==='walk'?Math.abs(Math.sin(T*10))*.05:0;
-   g.rotation.x=m==='lie'?-Math.PI/2:0;if(p.book)p.book.visible=m==='read';pose(p,T)})}
+   const m=p.mode;g.position.y=m==='lie'?.8:(m==='sit'||m==='read')?(p.sy??.07):m==='walk'?Math.abs(Math.sin(T*10))*.05:m==='cheer'?Math.abs(Math.sin(T*7))*.32:0;
+   g.rotation.x=m==='lie'?-Math.PI/2:(p.tilt||0);if(p.book)p.book.visible=m==='read';pose(p,T)})}
  connect();return{tick,R,live:()=>performance.now()-lastAn<2500,myId:()=>myId,send:o=>{if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}}})();
 // 루프
 function pose(p,t){[p.armL,p.armR,p.legL,p.legR].forEach(a=>a.rotation.set(0,0,0));const m=p.mode;
+ if(p.bo){p.g.position.x-=p.bo[0];p.g.position.z-=p.bo[1];p.bo=null}
+ if(p._pm!==m){p._pm=m;p.mT0=t}const tt=t-(p.mT0||0);p.tilt=0;
  if(m=='walk'){const s=Math.sin(t*10);p.legL.rotation.x=s*.7;p.legR.rotation.x=-s*.7;p.armL.rotation.x=-s*.6;p.armR.rotation.x=s*.6}
  else if(m=='sit'||m=='read'){p.legL.rotation.x=p.legR.rotation.x=-Math.PI/2;if(m=='read')p.armL.rotation.x=p.armR.rotation.x=-1.15}
  else if(m=='wave')p.armR.rotation.z=2.5+Math.sin(t*12)*.3;
@@ -784,15 +816,20 @@ function pose(p,t){[p.armL,p.armR,p.legL,p.legR].forEach(a=>a.rotation.set(0,0,0
  else if(m=='xr'){p.armL.rotation.z=-2.7;p.armR.rotation.z=2.7}
  else if(m=='eat')p.armR.rotation.x=-2.3+Math.sin(t*8)*.15;
  else if(m=='hug'){p.armL.rotation.x=p.armR.rotation.x=-1.15}
- else if(m=='shot')p.armR.rotation.z=1.4}
+ else if(m=='shot')p.armR.rotation.z=1.4
+ else if(m=='bow'){const s=tt<.7?tt/.7:tt<1.6?1:tt<2.4?1-(tt-1.6)/.8:0,a=.85*s*s*(3-2*s);p.tilt=a;
+  p.legL.rotation.x=p.legR.rotation.x=-a;p.armL.rotation.x=p.armR.rotation.x=-a*.9;
+  const o=-.45*Math.sin(a),yw=p.g.rotation.y;p.bo=[o*Math.sin(yw),o*Math.cos(yw)];p.g.position.x+=p.bo[0];p.g.position.z+=p.bo[1]}
+ else if(m=='cheer'){const w=Math.sin(t*14)*.2;p.armR.rotation.z=2.7+w;p.armL.rotation.z=-2.7-w}
+ else if(m=='clap'){const z=.2+.5*(.5-.5*Math.cos(tt*Math.PI*8));p.armL.rotation.x=p.armR.rotation.x=-1.25;p.armR.rotation.z=-z;p.armL.rotation.z=z}}
 let last=performance.now(),T=0;
 function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.05);last=now;T+=dt;
  const hv=dpadMove(dt);if(!hv&&path.length){const tg=path[0],p=me.g.position,dx=tg.x-p.x,dz=tg.z-p.z,d=Math.hypot(dx,dz),st=3*dt;
   let da=Math.atan2(dx,dz)-me.g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));me.g.rotation.y+=da*Math.min(1,dt*14);
   if(d<=st){p.x=tg.x;p.z=tg.z;path.shift();if(!path.length){me.mode='idle';if(pr){const r=pr;pr=null;r(true)}}}else{p.x+=dx/d*st;p.z+=dz/d*st}}
- me.g.position.y=me.mode=='lie'?.8:(me.mode=='sit'||me.mode=='read')?(me.sitY??.07):me.mode=='walk'?Math.abs(Math.sin(T*10))*.05:0;
+ me.g.position.y=me.mode=='lie'?.8:(me.mode=='sit'||me.mode=='read')?(me.sitY??.07):me.mode=='walk'?Math.abs(Math.sin(T*10))*.05:me.mode=='cheer'?Math.abs(Math.sin(T*7))*.32:0;
  [me,man,doc,nu1,nu2,rad].forEach(p=>pose(p,T));MP.tick(dt);ANIM.tick(dt);nu1.g.scale.y=1.35+Math.sin(T*2+2)*.01;nu2.g.scale.y=1.35+Math.sin(T*2+3)*.01;man.g.scale.y=1.35+Math.sin(T*2)*.01;doc.g.scale.y=1.35+Math.sin(T*2+1)*.01;
- me.g.rotation.x=me.mode=='lie'?-Math.PI/2:0;book.visible=me.mode=='read';
+ me.g.rotation.x=me.mode=='lie'?-Math.PI/2:(me.tilt||0);book.visible=me.mode=='read';
  const c=me.g.position,D=9*zoom,d=D*Math.cos(camP),h=D*Math.sin(camP);
  cam.position.lerp(new THREE.Vector3(c.x+Math.sin(camA)*d,h,c.z+Math.cos(camA)*d),.1);cam.lookAt(c.x,.5,c.z);
  bs.forEach(o=>{const v=o.p.g.position.clone();v.y+=o.p.h;v.project(cam);o.e.style.transform=`translate(-50%,-100%) translate(${(v.x*.5+.5)*innerWidth}px,${(-v.y*.5+.5)*innerHeight-4}px)`});
