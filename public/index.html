@@ -33,6 +33,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 @keyframes mqs{to{transform:translateX(-50%)}}
 .b.tag.mine .nm{pointer-events:auto;cursor:pointer}
 #pn input{width:100%;box-sizing:border-box;padding:9px 10px;border-radius:10px;border:1px solid rgba(127,127,127,.4);background:transparent;color:var(--fg);font-size:16px;-webkit-user-select:text;user-select:text}
+#mub{position:fixed;right:104px;top:calc(env(safe-area-inset-top,0px) + 10px);border:0;background:var(--btn);color:var(--fg);padding:9px 12px;border-radius:18px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
 #exb{position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);border:0;background:#ff6b6b;color:#fff;padding:9px 12px;border-radius:18px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
 #bye{position:fixed;inset:0;z-index:200;background:#cfe8f5;color:#2b2b2b;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:30px;font-size:17px}
 #bye button{border:0;background:#ff8fb1;color:#fff;padding:10px 20px;border-radius:14px;font-size:15px;cursor:pointer}
@@ -47,7 +48,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 #pn .chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
 .chip.lock{opacity:.38}
 #toast{display:none;position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 110px);transform:translateX(-50%);background:rgba(30,30,40,.92);color:#fff;padding:10px 16px;border-radius:16px;font-size:14px;z-index:300;max-width:84vw;text-align:center;pointer-events:none}
-#trow{display:flex;align-items:center;gap:4px;flex-wrap:wrap;max-width:calc(100% - 80px)}#mps{background:var(--card);color:var(--fg);padding:5px 7px;border-radius:12px;font-size:11px;pointer-events:auto;cursor:pointer;white-space:nowrap}
+#trow{display:flex;align-items:center;gap:4px;flex-wrap:wrap;max-width:calc(100% - 150px)}#mps{background:var(--card);color:var(--fg);padding:5px 7px;border-radius:12px;font-size:11px;pointer-events:auto;cursor:pointer;white-space:nowrap}
 #mm{flex:1;min-width:0}#msn em{font-style:normal;opacity:.6;flex:none;font-variant-numeric:tabular-nums}
 #czb{position:fixed;right:58px;top:calc(env(safe-area-inset-top,0px) + 10px);border:0;background:var(--btn);color:var(--fg);padding:9px 12px;border-radius:18px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
 #pn .mcat{border:2px solid var(--ac);border-radius:14px;overflow:hidden}#pn .mcat.done{border-color:#2fb67c}#pn .mcat.real{border-color:#8a8fa3}
@@ -107,6 +108,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:
 </div>
 <div id="pn"><div><header><h3 id="pt"></h3><button onclick="pn.style.display='none'">✕ 닫기</button></header><ul id="pb"></ul></div></div>
 <button id="czb" onclick="openCz()" aria-label="꾸미기" title="꾸미기">🎨</button>
+<button id="mub" onclick="muteToggle()" aria-label="소리 끄기" title="소리 끄기">🔊</button>
 <button id="exb" onclick="quitApp()" aria-label="나가기" title="나가기">⏻</button>
 <div id="bye"><div>👋 달 소아청소년과를 나왔어요</div><div style="font-size:14px;opacity:.75">이 창을 닫거나 앱을 종료해 주세요</div><button onclick="document.getElementById('bye').style.display='none'">다시 들어가기</button></div>
 <script src="three.min.js"></script>
@@ -586,13 +588,17 @@ async function cafe(i,t){if(!await go(24,[-136,-51][i]))return;face(Math.PI/2);m
 function cafeNear(t){const y=PX(me.g.position)[1];cafe(Math.abs(y+136)<Math.abs(y+51)?0:1,t)}
 async function snackAct(t){if(!await go(208,240))return;face(-Math.PI/2);say(me,'우와, 간식이다! 🍪',2200);await sleep(1300);if(t!==token)return;me.mode='eat';sfx('munch');mission('snack');await sleep(2200);if(t!==token)return;say(me,'냠냠~ 맛있다 😋',2200);await sleep(1000);if(t!==token)return;me.mode='idle'}
 // ===== 감정 표현 (안녕 / 감사 / 신나 / 짝짝) =====
-const emEl=document.getElementById('em'),emB=document.getElementById('emb');
+const emEl=document.getElementById('em'),emB=document.getElementById('emb');muteUi();
+function muteUi(){const b=document.getElementById('mub');b.textContent=muted?'🔇':'🔊';b.title=muted?'소리 켜기':'소리 끄기';b.setAttribute('aria-label',b.title)}
+function muteToggle(){muted=!muted;try{localStorage.setItem('dkmute',muted?'1':'0')}catch(e){}
+ if(muted){if(audCtx)try{audCtx.suspend()}catch(e){}}else aud();muteUi();toast(muted?'소리를 껐어요 🔇':'소리를 켰어요 🔊')}
 function emClose(){emEl.classList.remove('open');emB.textContent='😊'}
 function emToggle(){const o=emEl.classList.toggle('open');emB.textContent=o?'✕':'😊'}
 cv.addEventListener('pointerdown',emClose);
 const EMO={hi:{mode:'wave',say:'안녕! 👋',dur:2600,ms:2400},thx:{mode:'bow',say:'감사합니다 🙇',dur:1300,ms:2400},joy:{mode:'cheer',say:'야호! 🎉',dur:2400,ms:2200},clap:{mode:'clap',say:'짝짝짝짝! 👏',dur:2300,ms:2200}};
 let audCtx=null;
-function aud(){try{audCtx=audCtx||new(window.AudioContext||window.webkitAudioContext)();if(audCtx.state==='suspended')audCtx.resume()}catch(e){}return audCtx}
+let muted=false;try{muted=localStorage.getItem('dkmute')==='1'}catch(e){}
+function aud(){if(muted)return null;try{audCtx=audCtx||new(window.AudioContext||window.webkitAudioContext)();if(audCtx.state==='suspended')audCtx.resume()}catch(e){}return audCtx}
 function clapSnd(){const c=aud();if(!c)return;try{const n=Math.floor(c.sampleRate*.1),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);
  for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
  const s=c.createBufferSource();s.buffer=b;const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.8;
@@ -615,17 +621,17 @@ addEventListener('pointerdown',()=>aud(),true);addEventListener('keydown',()=>au
 function sfx(k){const c=aud();if(!c)return;try{
  const T=(f,t,d,v,ty,f2)=>tone(c,f,t,d,v,ty||'sine',f2),N=(t,d,v,fr,ty)=>noise(c,t,d,v,fr,ty);
  if(k==='recep'){T(880,0,.22,.18,'triangle');T(1175,.12,.35,.18,'triangle')}
- else if(k==='paper'){N(0,.14,.35,2500,'highpass');N(.12,.12,.3,3000,'highpass')}
- else if(k==='sit'){T(230,0,.18,.3,'sine',110);N(0,.1,.5,300)}
+ else if(k==='paper'){T(660,0,.28,.1,'sine',880);T(880,.1,.35,.09,'sine',1100)}
+ else if(k==='sit'){T(230,0,.2,.28,'sine',120)}
  else if(k==='beat'){for(const o of [0,.8,1.6]){T(75,o,.16,.55,'sine',48);T(70,o+.18,.16,.45,'sine',46)}}
- else if(k==='ouch'){T(950,0,.16,.2,'triangle',520);N(0,.04,.3,4000,'highpass')}
+ else if(k==='ouch'){T(950,0,.18,.18,'triangle',520)}
  else if(k==='ok'){T(660,0,.18,.18,'sine');T(880,.12,.3,.18,'sine')}
- else if(k==='munch'){for(let i=0;i<6;i++){N(i*.3,.08,.6,1400+Math.random()*600,'bandpass');N(i*.3+.1,.06,.4,1800,'bandpass')}}
+ else if(k==='munch'){for(let i=0;i<5;i++){T(380,i*.36,.16,.16,'sine',260);T(300,i*.36+.17,.14,.12,'sine',220)}}
  else if(k==='shutter'){T(2400,0,.05,.14,'square');N(0,.05,.5,3500,'highpass');T(1500,.09,.06,.12,'square');N(.09,.06,.4,3000,'highpass')}
- else if(k==='page'){N(0,.16,.35,2200,'highpass');N(.05,.1,.2,4000,'highpass')}
+ else if(k==='page'){T(330,0,.28,.09,'sine',560)}
  else if(k==='drip'){for(const o of [0,.7,1.5,2.2])T(1300,o,.14,.2,'sine',520)}
  else if(k==='cafe'){T(2200,0,.3,.13,'sine');T(3300,.02,.22,.09,'sine');T(2200,.35,.25,.1,'sine')}
- else if(k==='pick'){N(0,.22,.45,2500,'bandpass');N(.1,.18,.35,2000,'bandpass');T(600,.28,.1,.15,'sine',950)}
+ else if(k==='pick'){T(320,0,.12,.2,'sine',640);T(520,.1,.14,.16,'sine',820)}
  else if(k==='hug'){T(520,0,.4,.2,'triangle',780);T(660,.12,.5,.18,'triangle',990)}
  else if(k==='mission'){T(988,0,.2,.16,'triangle');T(1319,.12,.45,.18,'triangle')}
  else if(k==='bonus'){[523,659,784,1047].forEach((f,i)=>T(f,i*.11,.4,.17,'triangle'));T(2093,.5,.5,.1,'sine')}
