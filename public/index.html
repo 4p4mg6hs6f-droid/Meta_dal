@@ -597,7 +597,20 @@ function clapSnd(){const c=aud();if(!c)return;try{const n=Math.floor(c.sampleRat
  for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
  const s=c.createBufferSource();s.buffer=b;const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.8;
  const g=c.createGain();g.gain.value=.9;s.connect(f);f.connect(g);g.connect(c.destination);s.start()}catch(e){}}
-function emo(k){emClose();aud();run(async t=>{const E=EMO[k];face(camA);me.mode=E.mode;say(me,E.say,E.ms);
+function tone(c,f,t0,d,v=.25,ty='sine',f2){const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+t0;o.type=ty;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.05)}
+function noise(c,t0,d,v,fr,ty='lowpass'){const n=Math.floor(c.sampleRate*d),b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);
+ const s=c.createBufferSource();s.buffer=b;const f=c.createBiquadFilter();f.type=ty;f.frequency.value=fr;const g=c.createGain();g.gain.value=v;s.connect(f);f.connect(g);g.connect(c.destination);s.start(c.currentTime+t0)}
+function emSfx(k){const c=aud();if(!c)return;try{
+ if(k==='hi'){tone(c,880,0,.25,.22,'triangle');tone(c,1175,.14,.4,.22,'triangle')}
+ else if(k==='thx'){tone(c,784,0,.3,.2,'sine');tone(c,659,.2,.3,.2,'sine');tone(c,523,.4,.55,.22,'sine')}
+ else if(k==='joy'){tone(c,500,0,.45,.12,'sine',1900);
+  noise(c,.45,.7,1.2,260);tone(c,90,.45,.5,.5,'sine',40);
+  for(let i=0;i<14;i++)noise(c,.6+Math.random()*.9,.05,.5,3000+Math.random()*3000,'highpass');
+  tone(c,420,1.0,.35,.1,'sine',1600);noise(c,1.4,.6,.9,300);tone(c,80,1.4,.45,.4,'sine',38);
+  for(let i=0;i<12;i++)noise(c,1.55+Math.random()*.7,.05,.45,3000+Math.random()*3000,'highpass')}
+ }catch(e){}}
+function emo(k){emClose();aud();emSfx(k);run(async t=>{const E=EMO[k];me.mode=E.mode;say(me,E.say,E.ms);
  if(k==='clap')for(let i=0;i<8;i++)setTimeout(()=>{if(t===token&&me.mode==='clap')clapSnd()},145+250*i);
  await sleep(E.dur);if(t!==token)return;me.mode='idle'})}
 // 입력
